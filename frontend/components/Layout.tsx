@@ -19,6 +19,12 @@ export default function Layout({ children }: { children: ReactNode }) {
             <Link href="/my-tasks" className="nav-link">
               My Tasks
             </Link>
+            <Link href="/profile" className="nav-link">
+              Profile
+            </Link>
+            <Link href="/admin" className="nav-link">
+              Admin
+            </Link>
             <Link href="/login" className="btn btn-ghost">
               Logout
             </Link>

@@ -73,3 +73,4 @@ frontend/
 ## Notes
 - Tokens stored in localStorage for MVP simplicity. Consider httpOnly cookies in production.
 - `docker-compose` runs migrations automatically on backend startup.
+- Roles supported: student, teacher, mentor, curator, tech_admin, admin.

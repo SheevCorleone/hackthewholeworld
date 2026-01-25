@@ -13,10 +13,11 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(String(255))
     full_name: Mapped[str] = mapped_column(String(255))
     role: Mapped[str] = mapped_column(
-        Enum("student", "curator", "mentor", "admin", name="user_roles"),
+        Enum("student", "curator", "mentor", "teacher", "tech_admin", "admin", name="user_roles"),
         default="student",
         index=True,
     )
+    avatar_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     created_tasks = relationship("Task", back_populates="created_by_user", foreign_keys="Task.created_by")

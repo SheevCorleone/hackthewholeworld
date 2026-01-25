@@ -6,9 +6,10 @@ export default function HomePage() {
     <Layout>
       <section className="grid grid-2">
         <div className="grid" style={{ gap: "18px" }}>
-          <span className="pill">
-            Sber x SberLab-НГУ
-          </span>
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+            <span className="pill pill-sber">Сбер</span>
+            <span className="pill pill-nsu">НГУ</span>
+          </div>
           <h1 className="section-title">
             Совместные проекты, где студент и куратор видят прогресс в одном окне.
           </h1>
