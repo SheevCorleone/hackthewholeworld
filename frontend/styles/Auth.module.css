@@ -1,0 +1,38 @@
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 32px;
+}
+
+.card {
+  width: 100%;
+  max-width: 480px;
+  background: var(--card-0);
+  border: 1px solid var(--border-200);
+  border-radius: var(--radius-16);
+  padding: 28px;
+  box-shadow: var(--shadow-2);
+  animation: fadeUp 0.4s ease;
+}
+
+.title {
+  font-size: 26px;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  color: var(--muted-600);
+  margin: 0 0 20px;
+}
+
+.form {
+  display: grid;
+  gap: 16px;
+}
+
+.error {
+  color: #d6453d;
+  font-size: 13px;
+}
