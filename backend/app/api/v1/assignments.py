@@ -16,7 +16,7 @@ router = APIRouter(prefix="/assignments", tags=["assignments"])
 def create_assignment(
     payload: AssignmentCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles("student")),
+    current_user: User = Depends(require_roles("student", "curator", "mentor", "admin")),
 ):
     task = task_repo.get_task(db, payload.task_id)
     if not task:
@@ -29,7 +29,7 @@ def list_my_assignments(
     skip: int = 0,
     limit: int = 20,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles("student")),
+    current_user: User = Depends(require_roles("student", "curator", "mentor", "admin")),
 ):
     return assignment_repo.list_assignments_for_student(db, current_user.id, skip, limit)
 

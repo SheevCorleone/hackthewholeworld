@@ -11,4 +11,6 @@ COPY . .
 
 ENV PYTHONPATH=/app
 
-CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+RUN sed -i 's/\r$//' entrypoint.sh && chmod +x entrypoint.sh
+
+CMD ["./entrypoint.sh"]
