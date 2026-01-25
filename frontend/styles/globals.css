@@ -6,7 +6,8 @@
   --text-900: #0b1f17;
   --text-700: #273b33;
   --muted-600: #5c6b65;
-  --bg-50: #f5f8f6;
+  --bg-50: #edf7f1;
+  --bg-100: #e3f2eb;
   --card-0: #ffffff;
   --border-200: #d9e2dc;
   --shadow-1: 0 6px 16px rgba(11, 31, 23, 0.08);
@@ -15,6 +16,9 @@
   --radius-16: 16px;
   --blue-600: #2d7cc0;
   --blue-100: #e9f2fb;
+  --gradient-soft: radial-gradient(circle at 10% 10%, rgba(27, 157, 75, 0.12), transparent 55%),
+    radial-gradient(circle at 80% 0%, rgba(27, 157, 75, 0.08), transparent 45%),
+    linear-gradient(180deg, #f3faf6 0%, #eaf6f0 100%);
 }
 
 * {

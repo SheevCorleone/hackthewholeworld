@@ -1,6 +1,6 @@
 .app {
   min-height: 100vh;
-  background: var(--bg-50);
+  background: var(--gradient-soft);
 }
 
 .header {
