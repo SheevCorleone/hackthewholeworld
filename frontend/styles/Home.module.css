@@ -1,0 +1,45 @@
+.hero {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.lead {
+  color: var(--muted-600);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.cardList {
+  margin-top: 16px;
+  display: grid;
+  gap: 8px;
+  color: var(--muted-600);
+  padding-left: 18px;
+}
+
+.note {
+  margin-top: 18px;
+  background: #f7faf8;
+  border-radius: var(--radius-12);
+  padding: 12px 14px;
+  color: var(--muted-600);
+  font-size: 12px;
+}

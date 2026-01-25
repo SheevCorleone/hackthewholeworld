@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
+import Card from "../components/Card";
+import Badge from "../components/Badge";
+import ErrorText from "../components/ErrorText";
 import { apiRequest } from "../components/api";
+import styles from "../styles/MyTasks.module.css";
 
 interface Assignment {
   id: number;
@@ -20,19 +24,17 @@ export default function MyTasksPage() {
 
   return (
     <Layout>
-      <h1 className="section-title" style={{ fontSize: "26px" }}>Мои задачи</h1>
-      {error && <p className="error" style={{ marginTop: "12px" }}>{error}</p>}
-      <div className="grid" style={{ marginTop: "20px", gap: "12px" }}>
+      <h1 className={styles.title}>Мои задачи</h1>
+      {error && <ErrorText style={{ marginTop: "12px" }}>{error}</ErrorText>}
+      <div className={styles.list}>
         {assignments.map((assignment) => (
-          <div key={assignment.id} className="card">
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Card key={assignment.id}>
+            <div className={styles.row}>
               <p style={{ fontWeight: 600 }}>Task #{assignment.task_id}</p>
-              <span className="badge">{assignment.state}</span>
+              <Badge tone="neutral">{assignment.state}</Badge>
             </div>
-            <p className="muted" style={{ marginTop: "8px", fontSize: "12px" }}>
-              Дедлайн и метрики доступны на странице задачи.
-            </p>
-          </div>
+            <p className={styles.meta}>Дедлайн и метрики доступны на странице задачи.</p>
+          </Card>
         ))}
       </div>
     </Layout>

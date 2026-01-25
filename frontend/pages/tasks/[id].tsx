@@ -1,7 +1,13 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Layout from "../../components/Layout";
+import Button from "../../components/Button";
+import Card from "../../components/Card";
+import Badge from "../../components/Badge";
+import ErrorText from "../../components/ErrorText";
+import Input from "../../components/Input";
 import { apiRequest } from "../../components/api";
+import styles from "../../styles/TaskDetail.module.css";
 
 interface Task {
   id: number;
@@ -66,46 +72,47 @@ export default function TaskDetailPage() {
 
   return (
     <Layout>
-      {error && <p className="muted">{error}</p>}
+      {error && <ErrorText>{error}</ErrorText>}
       {task && (
-        <div className="grid" style={{ gap: "24px" }}>
-          <div className="card">
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <h1 className="section-title" style={{ fontSize: "24px" }}>{task.title}</h1>
-              <span className="badge">{task.status}</span>
+        <div className={styles.wrapper}>
+          <Card>
+            <div className={styles.header}>
+              <h1 className={styles.title}>{task.title}</h1>
+              <Badge tone="sber">{task.status}</Badge>
             </div>
-            <p className="subtitle" style={{ marginTop: "12px" }}>{task.description}</p>
-            <div style={{ marginTop: "12px", display: "flex", flexWrap: "wrap", gap: "10px" }}>
-              <span className="pill">Mentor: {task.mentor_id ?? "TBD"}</span>
-              <span className="pill">Tags: {task.tags || "—"}</span>
+            <p className={styles.description}>{task.description}</p>
+            <div className={styles.meta}>
+              <Badge tone="neutral">Mentor: {task.mentor_id ?? "TBD"}</Badge>
+              <Badge tone="neutral">Tags: {task.tags || "—"}</Badge>
             </div>
-            <button onClick={requestAssignment} className="btn btn-primary" style={{ marginTop: "16px" }}>
+            <Button onClick={requestAssignment} style={{ marginTop: "16px" }}>
               Взять в работу
-            </button>
-          </div>
+            </Button>
+          </Card>
 
-          <div className="card">
+          <Card>
             <h2>Комментарии</h2>
-            <div style={{ marginTop: "12px", display: "flex", gap: "12px", flexWrap: "wrap" }}>
-              <input
+            <div className={styles.commentBox}>
+              <Input
                 value={commentBody}
                 onChange={(event) => setCommentBody(event.target.value)}
                 placeholder="Оставить комментарий"
-                className="input"
               />
-              <button onClick={submitComment} className="btn btn-outline">
+              <Button variant="secondary" onClick={submitComment}>
                 Отправить
-              </button>
+              </Button>
             </div>
-            <ul className="grid" style={{ marginTop: "16px", gap: "12px" }}>
+            <ul className={styles.commentList}>
               {comments.map((comment) => (
-                <li key={comment.id} className="card-soft">
-                  <p>{comment.body}</p>
-                  <span className="muted" style={{ fontSize: "12px" }}>Author {comment.author_id}</span>
+                <li key={comment.id}>
+                  <Card style={{ background: "#f8faf9" }}>
+                    <p>{comment.body}</p>
+                    <span style={{ fontSize: "12px", color: "var(--muted-600)" }}>Author {comment.author_id}</span>
+                  </Card>
                 </li>
               ))}
             </ul>
-          </div>
+          </Card>
         </div>
       )}
     </Layout>

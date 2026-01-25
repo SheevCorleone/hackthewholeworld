@@ -1,7 +1,14 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Layout from "../../components/Layout";
+import ButtonLink from "../../components/ButtonLink";
+import Card from "../../components/Card";
+import Badge from "../../components/Badge";
+import ErrorText from "../../components/ErrorText";
+import Input from "../../components/Input";
+import Select from "../../components/Select";
 import { apiRequest } from "../../components/api";
+import styles from "../../styles/Tasks.module.css";
 
 interface Task {
   id: number;
@@ -26,40 +33,37 @@ export default function TasksPage() {
 
   return (
     <Layout>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <h1 className="section-title" style={{ fontSize: "26px" }}>Tasks</h1>
-        <Link href="/tasks/new" className="btn btn-primary">
+      <div className={styles.header}>
+        <h1 className={styles.title}>Tasks</h1>
+        <ButtonLink href="/tasks/new" size="md">
           Создать задачу
-        </Link>
+        </ButtonLink>
       </div>
-      <div className="card" style={{ marginTop: "20px", display: "flex", flexWrap: "wrap", gap: "12px" }}>
-        <input
+      <Card className={styles.filters}>
+        <Input
           placeholder="Поиск по названию"
-          className="input"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
         />
-        <select
-          className="select"
-          value={statusFilter}
-          onChange={(event) => setStatusFilter(event.target.value)}
-        >
+        <Select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
           <option value="open">Open</option>
           <option value="in_progress">In progress</option>
           <option value="completed">Completed</option>
           <option value="closed">Closed</option>
-        </select>
-      </div>
-      {error && <p className="error" style={{ marginTop: "12px" }}>{error}</p>}
-      <div className="grid" style={{ marginTop: "20px" }}>
+        </Select>
+      </Card>
+      {error && <ErrorText style={{ marginTop: "12px" }}>{error}</ErrorText>}
+      <div className={styles.list}>
         {tasks.map((task) => (
-          <Link key={task.id} href={`/tasks/${task.id}`} className="card">
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <h2 style={{ fontSize: "18px", fontWeight: 600 }}>{task.title}</h2>
-              <span className="badge">{task.status}</span>
-            </div>
-            <p className="subtitle" style={{ marginTop: "12px" }}>{task.description}</p>
-            {task.tags && <p className="muted" style={{ marginTop: "8px", fontSize: "12px" }}>Tags: {task.tags}</p>}
+          <Link key={task.id} href={`/tasks/${task.id}`}>
+            <Card>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <h2 className={styles.cardTitle}>{task.title}</h2>
+                <Badge tone="sber">{task.status}</Badge>
+              </div>
+              <p className={styles.cardBody}>{task.description}</p>
+              {task.tags && <p className={styles.cardMeta}>Tags: {task.tags}</p>}
+            </Card>
           </Link>
         ))}
       </div>

@@ -1,6 +1,12 @@
 import { FormEvent, useEffect, useState } from "react";
 import Layout from "../components/Layout";
+import Button from "../components/Button";
+import Card from "../components/Card";
+import Input from "../components/Input";
+import Badge from "../components/Badge";
+import ErrorText from "../components/ErrorText";
 import { apiRequest } from "../components/api";
+import styles from "../styles/Profile.module.css";
 
 interface UserProfile {
   id: number;
@@ -43,51 +49,30 @@ export default function ProfilePage() {
 
   return (
     <Layout>
-      <h1 className="section-title" style={{ fontSize: "26px" }}>Личный кабинет</h1>
-      {error && <p className="error" style={{ marginTop: "12px" }}>{error}</p>}
+      <h1 className={styles.title}>Личный кабинет</h1>
+      {error && <ErrorText style={{ marginTop: "12px" }}>{error}</ErrorText>}
       {user && (
-        <div className="grid grid-2" style={{ marginTop: "20px" }}>
-          <div className="card">
-            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-              <div
-                style={{
-                  width: 72,
-                  height: 72,
-                  borderRadius: "50%",
-                  background: "#e7f4ec",
-                  border: "1px solid #d9e2dc",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontWeight: 600,
-                  fontSize: "20px"
-                }}
-              >
-                {(user.full_name || "U").slice(0, 1)}
-              </div>
+        <div className={styles.grid}>
+          <Card>
+            <div className={styles.row}>
+              <div className={styles.avatar}>{(user.full_name || "U").slice(0, 1)}</div>
               <div>
-                <div className="label">Профиль</div>
+                <div style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--muted-600)" }}>Профиль</div>
                 <div style={{ fontSize: "18px", fontWeight: 600 }}>{user.full_name}</div>
-                <div className="subtitle">{user.email}</div>
-                <div className="pill" style={{ marginTop: "8px" }}>{user.role}</div>
+                <div style={{ color: "var(--muted-600)" }}>{user.email}</div>
+                <Badge tone="sber" style={{ marginTop: "8px" }}>{user.role}</Badge>
               </div>
             </div>
-          </div>
-          <div className="card">
+          </Card>
+          <Card>
             <h2>Настройки</h2>
-            <form onSubmit={handleSubmit} className="grid" style={{ marginTop: "16px", gap: "14px" }}>
-              <div>
-                <label className="label">ФИО</label>
-                <input name="full_name" defaultValue={user.full_name} className="input" />
-              </div>
-              <div>
-                <label className="label">Avatar URL</label>
-                <input name="avatar_url" defaultValue={user.avatar_url || ""} className="input" placeholder="https://..." />
-              </div>
-              <button type="submit" className="btn btn-primary">Сохранить</button>
-              {status && <p className="muted">{status}</p>}
+            <form onSubmit={handleSubmit} style={{ marginTop: "16px", display: "grid", gap: "14px" }}>
+              <Input name="full_name" label="ФИО" defaultValue={user.full_name} />
+              <Input name="avatar_url" label="Avatar URL" defaultValue={user.avatar_url || ""} placeholder="https://..." />
+              <Button type="submit">Сохранить</Button>
+              {status && <p style={{ color: "var(--muted-600)" }}>{status}</p>}
             </form>
-          </div>
+          </Card>
         </div>
       )}
     </Layout>

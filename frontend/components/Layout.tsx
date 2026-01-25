@@ -1,37 +1,37 @@
 import Link from "next/link";
 import { ReactNode } from "react";
+import ButtonLink from "./ButtonLink";
+import styles from "../styles/Layout.module.css";
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <div className="app">
-      <header className="header">
-        <div className="header-inner">
-          <Link href="/" className="logo">
+    <div className={styles.app}>
+      <header className={styles.header}>
+        <div className={styles.headerInner}>
+          <Link href="/" className={styles.logo}>
             SberCollab
           </Link>
-          <nav className="nav">
-            <Link href="/dashboard" className="nav-link">
+          <nav className={styles.nav}>
+            <Link href="/dashboard" className={styles.navLink}>
               Dashboard
             </Link>
-            <Link href="/tasks" className="nav-link">
+            <Link href="/tasks" className={styles.navLink}>
               Tasks
             </Link>
-            <Link href="/my-tasks" className="nav-link">
+            <Link href="/my-tasks" className={styles.navLink}>
               My Tasks
             </Link>
-            <Link href="/profile" className="nav-link">
+            <Link href="/profile" className={styles.navLink}>
               Profile
             </Link>
-            <Link href="/admin" className="nav-link">
+            <Link href="/admin" className={styles.navLink}>
               Admin
             </Link>
-            <Link href="/login" className="btn btn-ghost">
-              Logout
-            </Link>
+            <ButtonLink href="/login" variant="ghost" size="sm">Logout</ButtonLink>
           </nav>
         </div>
       </header>
-      <main className="container">{children}</main>
+      <main className={styles.container}>{children}</main>
     </div>
   );
 }

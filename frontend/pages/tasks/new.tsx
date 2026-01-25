@@ -1,6 +1,11 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/router";
 import Layout from "../../components/Layout";
+import Button from "../../components/Button";
+import Card from "../../components/Card";
+import ErrorText from "../../components/ErrorText";
+import Input from "../../components/Input";
+import Textarea from "../../components/Textarea";
 import { apiRequest } from "../../components/api";
 
 export default function NewTaskPage() {
@@ -31,35 +36,20 @@ export default function NewTaskPage() {
 
   return (
     <Layout>
-      <h1 className="section-title" style={{ fontSize: "26px" }}>Создать задачу</h1>
-      <form onSubmit={handleSubmit} className="card" style={{ marginTop: "20px", display: "grid", gap: "16px" }}>
-        <div>
-          <label className="label">Заголовок</label>
-          <input name="title" placeholder="Новый кейс" className="input" required />
-        </div>
-        <div>
-          <label className="label">Описание</label>
-          <textarea name="description" placeholder="Опишите цель и ожидаемый результат" className="textarea" rows={6} required />
-        </div>
-        <div className="grid grid-2">
-          <div>
-            <label className="label">Теги</label>
-            <input name="tags" placeholder="ml, analytics" className="input" />
+      <h1 style={{ fontSize: "26px", fontWeight: 600 }}>Создать задачу</h1>
+      <Card style={{ marginTop: "20px" }}>
+        <form onSubmit={handleSubmit} style={{ display: "grid", gap: "16px" }}>
+          <Input name="title" label="Заголовок" placeholder="Новый кейс" required />
+          <Textarea name="description" label="Описание" placeholder="Опишите цель и ожидаемый результат" rows={6} required />
+          <div style={{ display: "grid", gap: "16px", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
+            <Input name="tags" label="Теги" placeholder="ml, analytics" />
+            <Input name="mentor_id" label="ID ментора" placeholder="123" />
           </div>
-          <div>
-            <label className="label">ID ментора</label>
-            <input name="mentor_id" placeholder="123" className="input" />
-          </div>
-        </div>
-        <div>
-          <label className="label">Deadline</label>
-          <input name="deadline" placeholder="Deadline" type="date" className="input" />
-        </div>
-        {error && <p className="muted">{error}</p>}
-        <button type="submit" className="btn btn-primary">
-          Сохранить
-        </button>
-      </form>
+          <Input name="deadline" type="date" label="Deadline" />
+          {error && <ErrorText>{error}</ErrorText>}
+          <Button type="submit">Сохранить</Button>
+        </form>
+      </Card>
     </Layout>
   );
 }

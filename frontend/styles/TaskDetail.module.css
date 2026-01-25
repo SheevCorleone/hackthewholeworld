@@ -1,0 +1,42 @@
+.wrapper {
+  display: grid;
+  gap: 20px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.meta {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.description {
+  margin-top: 12px;
+  color: var(--text-700);
+}
+
+.commentBox {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.commentList {
+  margin-top: 16px;
+  display: grid;
+  gap: 12px;
+}

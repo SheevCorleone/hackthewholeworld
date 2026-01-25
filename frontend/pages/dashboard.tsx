@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
+import Card from "../components/Card";
+import Badge from "../components/Badge";
+import ErrorText from "../components/ErrorText";
 import { apiRequest } from "../components/api";
+import styles from "../styles/Dashboard.module.css";
 
 interface User {
   id: number;
@@ -21,39 +25,37 @@ export default function DashboardPage() {
 
   return (
     <Layout>
-      <h1 className="section-title" style={{ fontSize: "26px" }}>Dashboard</h1>
-      {error && <p className="error" style={{ marginTop: "12px" }}>{error}</p>}
+      <h1 className={styles.title}>Dashboard</h1>
+      {error && <ErrorText style={{ marginTop: "12px" }}>{error}</ErrorText>}
       {user && (
-        <div className="card" style={{ marginTop: "24px" }}>
-          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
+        <Card style={{ marginTop: "24px" }}>
+          <div className={styles.metaRow}>
             <div>
-              <p className="label">Logged in</p>
-              <p style={{ fontSize: "18px", fontWeight: 600 }}>{user.full_name}</p>
-              <p className="subtitle">Role: {user.role}</p>
+              <p style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--muted-600)" }}>Logged in</p>
+              <p className={styles.metaName}>{user.full_name}</p>
+              <p style={{ color: "var(--muted-600)", margin: 0 }}>Role: {user.role}</p>
             </div>
-            <div className="pill">
-              Синхронизация активна · 100%
-            </div>
+            <Badge tone="sber">Синхронизация активна · 100%</Badge>
           </div>
-          <div className="grid grid-2" style={{ marginTop: "24px" }}>
-            <div className="card-soft">
+          <div className={styles.grid}>
+            <Card style={{ background: "#f8faf9" }}>
               <h2>Следующие шаги</h2>
-              <ul className="list" style={{ marginTop: "12px" }}>
+              <ul style={{ marginTop: "12px", paddingLeft: "18px", color: "var(--muted-600)", display: "grid", gap: "8px" }}>
                 <li>Проверьте открытые задачи и выберите релевантный кейс.</li>
                 <li>Запросите участие и ожидайте подтверждения ментора.</li>
                 <li>Обновляйте статус и оставляйте комментарии.</li>
               </ul>
-            </div>
-            <div className="card-soft">
+            </Card>
+            <Card style={{ background: "#f8faf9" }}>
               <h2>Рекомендации для куратора</h2>
-              <ul className="list" style={{ marginTop: "12px" }}>
+              <ul style={{ marginTop: "12px", paddingLeft: "18px", color: "var(--muted-600)", display: "grid", gap: "8px" }}>
                 <li>Создайте новый кейс и назначьте ментора.</li>
                 <li>Соберите команды и утвердите заявки.</li>
                 <li>Закройте кейс с итоговым статусом.</li>
               </ul>
-            </div>
+            </Card>
           </div>
-        </div>
+        </Card>
       )}
     </Layout>
   );

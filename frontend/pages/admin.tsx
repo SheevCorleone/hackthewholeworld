@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
+import Card from "../components/Card";
+import Select from "../components/Select";
+import ErrorText from "../components/ErrorText";
 import { apiRequest } from "../components/api";
+import styles from "../styles/Admin.module.css";
 
 interface UserRow {
   id: number;
@@ -39,10 +43,10 @@ export default function AdminPage() {
 
   return (
     <Layout>
-      <h1 className="section-title" style={{ fontSize: "26px" }}>Техническая администрация</h1>
-      <p className="subtitle">Управление ролями и доступом пользователей.</p>
-      {error && <p className="error" style={{ marginTop: "12px" }}>{error}</p>}
-      <div className="card" style={{ marginTop: "20px" }}>
+      <h1 className={styles.title}>Техническая администрация</h1>
+      <p className={styles.subtitle}>Управление ролями и доступом пользователей.</p>
+      {error && <ErrorText style={{ marginTop: "12px" }}>{error}</ErrorText>}
+      <Card className={styles.tableWrap}>
         <table className="table">
           <thead>
             <tr>
@@ -57,8 +61,7 @@ export default function AdminPage() {
                 <td>{user.full_name}</td>
                 <td>{user.email}</td>
                 <td>
-                  <select
-                    className="select"
+                  <Select
                     value={user.role}
                     onChange={(event) => updateRole(user.id, event.target.value)}
                   >
@@ -67,13 +70,13 @@ export default function AdminPage() {
                         {role}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
+      </Card>
     </Layout>
   );
 }

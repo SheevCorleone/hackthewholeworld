@@ -1,0 +1,31 @@
+.title {
+  font-size: 26px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.grid {
+  margin-top: 20px;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--green-100);
+  border: 1px solid #c6ead6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 20px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
