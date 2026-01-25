@@ -1,14 +1,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Layout from "../../components/Layout";
-import ButtonLink from "../../components/ButtonLink";
-import Card from "../../components/Card";
-import Badge from "../../components/Badge";
-import ErrorText from "../../components/ErrorText";
-import Input from "../../components/Input";
-import Select from "../../components/Select";
 import { apiRequest } from "../../components/api";
-import styles from "../../styles/Tasks.module.css";
 
 interface Task {
   id: number;
@@ -33,37 +26,40 @@ export default function TasksPage() {
 
   return (
     <Layout>
-      <div className={styles.header}>
-        <h1 className={styles.title}>Tasks</h1>
-        <ButtonLink href="/tasks/new" size="md">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Tasks</h1>
+        <Link href="/tasks/new" className="rounded-full bg-emerald-600 px-5 py-2 text-sm font-medium text-white shadow-sm">
           Создать задачу
-        </ButtonLink>
+        </Link>
       </div>
-      <Card className={styles.filters}>
-        <Input
+      <div className="mt-6 flex flex-wrap gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <input
           placeholder="Поиск по названию"
+          className="min-w-[220px] flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
         />
-        <Select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+        <select
+          className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
+          value={statusFilter}
+          onChange={(event) => setStatusFilter(event.target.value)}
+        >
           <option value="open">Open</option>
           <option value="in_progress">In progress</option>
           <option value="completed">Completed</option>
           <option value="closed">Closed</option>
-        </Select>
-      </Card>
-      {error && <ErrorText style={{ marginTop: "12px" }}>{error}</ErrorText>}
-      <div className={styles.list}>
+        </select>
+      </div>
+      {error && <p className="mt-4 text-red-600">{error}</p>}
+      <div className="mt-6 grid gap-4">
         {tasks.map((task) => (
-          <Link key={task.id} href={`/tasks/${task.id}`}>
-            <Card>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <h2 className={styles.cardTitle}>{task.title}</h2>
-                <Badge tone="sber">{task.status}</Badge>
-              </div>
-              <p className={styles.cardBody}>{task.description}</p>
-              {task.tags && <p className={styles.cardMeta}>Tags: {task.tags}</p>}
-            </Card>
+          <Link key={task.id} href={`/tasks/${task.id}`} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-slate-300">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold">{task.title}</h2>
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs uppercase">{task.status}</span>
+            </div>
+            <p className="mt-3 text-sm text-slate-600">{task.description}</p>
+            {task.tags && <p className="mt-2 text-xs text-slate-500">Tags: {task.tags}</p>}
           </Link>
         ))}
       </div>

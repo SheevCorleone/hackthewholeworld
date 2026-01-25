@@ -14,7 +14,6 @@ class UserCreate(UserBase):
 class UserRead(UserBase):
     id: int
     role: str
-    avatar_url: str | None = None
     created_at: datetime
 
     class Config:
@@ -23,8 +22,3 @@ class UserRead(UserBase):
 
 class UserUpdateRole(BaseModel):
     role: str
-
-
-class UserUpdate(BaseModel):
-    full_name: str | None = None
-    avatar_url: str | None = None

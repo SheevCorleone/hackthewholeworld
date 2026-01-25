@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
-import Card from "../components/Card";
-import Badge from "../components/Badge";
-import ErrorText from "../components/ErrorText";
 import { apiRequest } from "../components/api";
-import styles from "../styles/Dashboard.module.css";
 
 interface User {
   id: number;
@@ -25,37 +21,39 @@ export default function DashboardPage() {
 
   return (
     <Layout>
-      <h1 className={styles.title}>Dashboard</h1>
-      {error && <ErrorText style={{ marginTop: "12px" }}>{error}</ErrorText>}
+      <h1 className="text-2xl font-semibold">Dashboard</h1>
+      {error && <p className="mt-4 text-red-600">{error}</p>}
       {user && (
-        <Card style={{ marginTop: "24px" }}>
-          <div className={styles.metaRow}>
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p style={{ fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--muted-600)" }}>Logged in</p>
-              <p className={styles.metaName}>{user.full_name}</p>
-              <p style={{ color: "var(--muted-600)", margin: 0 }}>Role: {user.role}</p>
+              <p className="text-xs uppercase tracking-wide text-slate-400">Logged in</p>
+              <p className="text-lg font-semibold">{user.full_name}</p>
+              <p className="text-sm text-slate-500">Role: {user.role}</p>
             </div>
-            <Badge tone="sber">Синхронизация активна · 100%</Badge>
+            <div className="rounded-full border border-slate-200 px-4 py-2 text-xs text-slate-500">
+              Синхронизация активна · 100%
+            </div>
           </div>
-          <div className={styles.grid}>
-            <Card style={{ background: "#f8faf9" }}>
-              <h2>Следующие шаги</h2>
-              <ul style={{ marginTop: "12px", paddingLeft: "18px", color: "var(--muted-600)", display: "grid", gap: "8px" }}>
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <h2 className="font-semibold">Следующие шаги</h2>
+              <ul className="mt-3 space-y-2 text-sm text-slate-600">
                 <li>Проверьте открытые задачи и выберите релевантный кейс.</li>
                 <li>Запросите участие и ожидайте подтверждения ментора.</li>
                 <li>Обновляйте статус и оставляйте комментарии.</li>
               </ul>
-            </Card>
-            <Card style={{ background: "#f8faf9" }}>
-              <h2>Рекомендации для куратора</h2>
-              <ul style={{ marginTop: "12px", paddingLeft: "18px", color: "var(--muted-600)", display: "grid", gap: "8px" }}>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <h2 className="font-semibold">Рекомендации для куратора</h2>
+              <ul className="mt-3 space-y-2 text-sm text-slate-600">
                 <li>Создайте новый кейс и назначьте ментора.</li>
                 <li>Соберите команды и утвердите заявки.</li>
                 <li>Закройте кейс с итоговым статусом.</li>
               </ul>
-            </Card>
+            </div>
           </div>
-        </Card>
+        </div>
       )}
     </Layout>
   );

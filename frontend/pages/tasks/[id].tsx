@@ -1,13 +1,7 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Layout from "../../components/Layout";
-import Button from "../../components/Button";
-import Card from "../../components/Card";
-import Badge from "../../components/Badge";
-import ErrorText from "../../components/ErrorText";
-import Input from "../../components/Input";
 import { apiRequest } from "../../components/api";
-import styles from "../../styles/TaskDetail.module.css";
 
 interface Task {
   id: number;
@@ -72,47 +66,46 @@ export default function TaskDetailPage() {
 
   return (
     <Layout>
-      {error && <ErrorText>{error}</ErrorText>}
+      {error && <p className="text-red-600">{error}</p>}
       {task && (
-        <div className={styles.wrapper}>
-          <Card>
-            <div className={styles.header}>
-              <h1 className={styles.title}>{task.title}</h1>
-              <Badge tone="sber">{task.status}</Badge>
+        <div className="space-y-6">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="flex items-center justify-between">
+              <h1 className="text-2xl font-semibold">{task.title}</h1>
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs uppercase">{task.status}</span>
             </div>
-            <p className={styles.description}>{task.description}</p>
-            <div className={styles.meta}>
-              <Badge tone="neutral">Mentor: {task.mentor_id ?? "TBD"}</Badge>
-              <Badge tone="neutral">Tags: {task.tags || "—"}</Badge>
+            <p className="mt-4 text-sm text-slate-600">{task.description}</p>
+            <div className="mt-4 flex flex-wrap gap-4 text-xs text-slate-500">
+              <span className="rounded-full border border-slate-200 px-3 py-1">Mentor: {task.mentor_id ?? "TBD"}</span>
+              <span className="rounded-full border border-slate-200 px-3 py-1">Tags: {task.tags || "—"}</span>
             </div>
-            <Button onClick={requestAssignment} style={{ marginTop: "16px" }}>
+            <button onClick={requestAssignment} className="mt-6 rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm">
               Взять в работу
-            </Button>
-          </Card>
+            </button>
+          </div>
 
-          <Card>
-            <h2>Комментарии</h2>
-            <div className={styles.commentBox}>
-              <Input
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 className="text-lg font-semibold">Комментарии</h2>
+            <div className="mt-4 flex gap-2">
+              <input
                 value={commentBody}
                 onChange={(event) => setCommentBody(event.target.value)}
                 placeholder="Оставить комментарий"
+                className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm"
               />
-              <Button variant="secondary" onClick={submitComment}>
+              <button onClick={submitComment} className="rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white">
                 Отправить
-              </Button>
+              </button>
             </div>
-            <ul className={styles.commentList}>
+            <ul className="mt-4 space-y-3 text-sm text-slate-600">
               {comments.map((comment) => (
-                <li key={comment.id}>
-                  <Card style={{ background: "#f8faf9" }}>
-                    <p>{comment.body}</p>
-                    <span style={{ fontSize: "12px", color: "var(--muted-600)" }}>Author {comment.author_id}</span>
-                  </Card>
+                <li key={comment.id} className="rounded-xl border border-slate-200 p-3">
+                  <p>{comment.body}</p>
+                  <span className="text-xs text-slate-400">Author {comment.author_id}</span>
                 </li>
               ))}
             </ul>
-          </Card>
+          </div>
         </div>
       )}
     </Layout>

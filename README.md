@@ -1,16 +1,16 @@
-# SberCollab
+# SberCollab MVP
 
 ## Overview
-Production-ready platform for collaboration between Sber teams (curators/mentors) and SberLab-NSU students.
+Production-quality MVP for collaboration between Sber teams (curators/mentors) and SberLab-NSU students.
 
 ## Stack
 - Backend: FastAPI + SQLAlchemy + Alembic
 - DB: PostgreSQL
 - Auth: JWT (access + refresh) with bcrypt
-- Frontend: Next.js + TypeScript + CSS
+- Frontend: Next.js + TypeScript + TailwindCSS
 - Docker: docker-compose
 
-## Quick start (Docker)
+## Quick start
 
 ```bash
 cp .env.example .env
@@ -19,19 +19,6 @@ docker-compose up --build
 ```
 
 Backend will run on `http://localhost:8000` and frontend on `http://localhost:3000`.
-Postgres readiness is checked automatically before applying migrations.
-
-### First run checks
-
-```bash
-curl http://localhost:8000/health
-```
-
-```bash
-curl -X POST http://localhost:8000/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"student@nsu.ru","full_name":"Student One","password":"Secret123!"}'
-```
 
 ## Local dev (without Docker)
 
@@ -83,6 +70,5 @@ frontend/
 `/api/v1`
 
 ## Notes
-- Tokens stored in localStorage. Consider httpOnly cookies in production.
+- Tokens stored in localStorage for MVP simplicity. Consider httpOnly cookies in production.
 - `docker-compose` runs migrations automatically on backend startup.
-- Roles supported: student, teacher, mentor, curator, tech_admin, admin.
