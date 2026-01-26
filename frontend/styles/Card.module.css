@@ -6,7 +6,7 @@
   box-shadow: var(--shadow-1);
   background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  animation: fadeUp 0.35s ease;
+  animation: fadeInUp 0.35s ease;
 }
 
 .card:hover {

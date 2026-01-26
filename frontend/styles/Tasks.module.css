@@ -24,10 +24,32 @@
   gap: 16px;
 }
 
+.error {
+  color: #d6453d;
+  margin-top: 12px;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .cardTitle {
   font-size: 18px;
   font-weight: 600;
   margin: 0;
+}
+
+.status {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--green-100);
+  color: var(--green-700);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .cardMeta {

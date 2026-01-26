@@ -4,6 +4,11 @@
   margin: 0;
 }
 
+.error {
+  color: #d6453d;
+  margin-top: 12px;
+}
+
 .metaRow {
   display: flex;
   align-items: center;
@@ -12,10 +17,24 @@
   gap: 12px;
 }
 
+.metaLabel {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted-600);
+  margin: 0;
+}
+
 .metaName {
   font-size: 18px;
   font-weight: 600;
   margin: 4px 0 0;
+}
+
+.metaRole {
+  font-size: 14px;
+  color: var(--muted-600);
+  margin: 6px 0 0;
 }
 
 .badge {
@@ -23,8 +42,8 @@
   align-items: center;
   padding: 6px 12px;
   border-radius: 999px;
-  background: var(--green-100);
-  color: var(--green-700);
+  background: var(--blue-100);
+  color: var(--blue-600);
   font-size: 12px;
   font-weight: 600;
 }
@@ -34,4 +53,17 @@
   display: grid;
   gap: 16px;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.grid h2 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.grid ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted-600);
+  display: grid;
+  gap: 6px;
 }

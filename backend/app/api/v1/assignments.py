@@ -16,7 +16,7 @@ router = APIRouter(prefix="/assignments", tags=["assignments"])
 def create_assignment(
     payload: AssignmentCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles("student", "curator", "mentor", "admin")),
+    current_user: User = Depends(require_roles("student", "curator", "mentor", "manager", "admin")),
 ):
     task = task_repo.get_task(db, payload.task_id)
     if not task:
@@ -29,7 +29,7 @@ def list_my_assignments(
     skip: int = 0,
     limit: int = 20,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles("student", "curator", "mentor", "admin")),
+    current_user: User = Depends(require_roles("student", "curator", "mentor", "manager", "admin")),
 ):
     return assignment_repo.list_assignments_for_student(db, current_user.id, skip, limit)
 
@@ -44,6 +44,6 @@ def update_assignment(
     assignment = assignment_repo.get_assignment(db, assignment_id)
     if not assignment:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assignment not found")
-    if current_user.role not in {"curator", "mentor", "admin"}:
+    if current_user.role not in {"curator", "mentor", "manager", "admin"}:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
     return update_assignment_state(db, assignment, payload.state)

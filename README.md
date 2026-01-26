@@ -7,7 +7,7 @@ Production-quality MVP for collaboration between Sber teams (curators/mentors) a
 - Backend: FastAPI + SQLAlchemy + Alembic
 - DB: PostgreSQL
 - Auth: JWT (access + refresh) with bcrypt
-- Frontend: Next.js + TypeScript + TailwindCSS
+- Frontend: Next.js + TypeScript + CSS Modules
 - Docker: docker-compose
 
 ## Quick start
