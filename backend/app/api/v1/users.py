@@ -15,7 +15,7 @@ def list_users(
     skip: int = 0,
     limit: int = 20,
     db: Session = Depends(get_db),
-    _: User = Depends(require_roles("admin", "curator")),
+    _: User = Depends(require_roles("manager", "admin", "curator")),
 ):
     return user_repo.list_users(db, skip, limit)
 
@@ -25,7 +25,7 @@ def update_role(
     user_id: int,
     payload: UserUpdateRole,
     db: Session = Depends(get_db),
-    _: User = Depends(require_roles("admin")),
+    _: User = Depends(require_roles("manager", "admin")),
 ):
     user = db.get(User, user_id)
     user.role = payload.role

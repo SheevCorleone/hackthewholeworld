@@ -2,11 +2,12 @@ from fastapi import APIRouter, Body, Depends, HTTPException, status
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, require_roles
 from app.core.config import get_settings
 from app.core.security import create_access_token, create_refresh_token
 from app.db.session import get_db
 from app.schemas.auth import LoginRequest, TokenPair
+from app.models.user import User
 from app.schemas.user import UserCreate, UserRead
 from app.services.auth_service import authenticate_user, register_user
 
@@ -15,7 +16,11 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/register", response_model=UserRead)
-def register(payload: UserCreate, db: Session = Depends(get_db)):
+def register(
+    payload: UserCreate,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("manager", "admin")),
+):
     return register_user(db, payload.email, payload.full_name, payload.password)
 
 

@@ -18,3 +18,19 @@ def update_assignment_state(db: Session, assignment: Assignment, state: str) -> 
     assignment.state = state
     assignment.updated_at = datetime.utcnow()
     return assignment_repo.update_assignment(db, assignment)
+
+
+def decide_assignment(
+    db: Session,
+    assignment: Assignment,
+    *,
+    state: str,
+    decided_by: int,
+    reason: str | None = None,
+) -> Assignment:
+    assignment.state = state
+    assignment.decision_at = datetime.utcnow()
+    assignment.decided_by = decided_by
+    assignment.decision_reason = reason
+    assignment.updated_at = datetime.utcnow()
+    return assignment_repo.update_assignment(db, assignment)
