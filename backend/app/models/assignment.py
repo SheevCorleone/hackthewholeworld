@@ -7,23 +7,31 @@ from app.models.base import Base
 
 class Assignment(Base):
     __tablename__ = "assignments"
-    __table_args__ = (UniqueConstraint("task_id", "student_id", name="uq_task_student"),)
+    __table_args__ = (
+        UniqueConstraint("task_id", "student_id", name="uq_task_student"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     task_id: Mapped[int] = mapped_column(ForeignKey("tasks.id"), index=True)
     student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+
     state: Mapped[str] = mapped_column(
         Enum("requested", "active", "done", "canceled", name="assignment_state"),
         default="requested",
         index=True,
     )
+
     decision_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     decided_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     decision_reason: Mapped[str | None] = mapped_column(String(500), nullable=True)
+
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    task = relationship("Task", back_populates="assignments")
+    task = relationship(
+        "Task",
+        back_populates="assignments",
+    )
 
     student = relationship(
         "User",
@@ -33,6 +41,6 @@ class Assignment(Base):
 
     decided_by_user = relationship(
         "User",
-        foreign_keys=[decided_by],
         back_populates="decided_assignments",
+        foreign_keys=[decided_by],
     )
