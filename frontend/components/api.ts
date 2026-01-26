@@ -39,6 +39,14 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
   }
 
   if (!response.ok) {
+    if (response.status === 401 && typeof window !== "undefined") {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      window.location.href = "/login";
+    }
+    if (response.status === 403 && typeof window !== "undefined") {
+      window.location.href = "/403";
+    }
     const message = await response.json().catch(() => ({ detail: "Request failed" }));
     const detail = typeof message.detail === "string" ? message.detail : message.detail?.[0]?.msg || "Request failed";
     throw new Error(detail);

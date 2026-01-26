@@ -2,6 +2,10 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/router";
 import Layout from "../../components/Layout";
 import { apiRequest } from "../../components/api";
+import Input from "../../components/Input";
+import Textarea from "../../components/Textarea";
+import Button from "../../components/Button";
+import styles from "../../styles/TaskDetail.module.css";
 
 export default function NewTaskPage() {
   const router = useRouter();
@@ -31,34 +35,17 @@ export default function NewTaskPage() {
 
   return (
     <Layout>
-      <h1 className="text-2xl font-semibold">Создать задачу</h1>
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div>
-          <label className="text-xs text-slate-500">Заголовок</label>
-          <input name="title" placeholder="Новый кейс" className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2" required />
+      <h1 className={styles.title}>Создать задачу</h1>
+      <form onSubmit={handleSubmit} className={styles.formCard}>
+        <Input name="title" label="Заголовок" placeholder="Новый кейс" required />
+        <Textarea name="description" label="Описание" placeholder="Опишите цель и ожидаемый результат" rows={6} required />
+        <div className={styles.gridTwo}>
+          <Input name="tags" label="Теги" placeholder="ml, analytics" />
+          <Input name="mentor_id" label="ID ментора" placeholder="123" />
         </div>
-        <div>
-          <label className="text-xs text-slate-500">Описание</label>
-          <textarea name="description" placeholder="Опишите цель и ожидаемый результат" className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2" rows={6} required />
-        </div>
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
-            <label className="text-xs text-slate-500">Теги</label>
-            <input name="tags" placeholder="ml, analytics" className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2" />
-          </div>
-          <div>
-            <label className="text-xs text-slate-500">ID ментора</label>
-            <input name="mentor_id" placeholder="123" className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2" />
-          </div>
-        </div>
-        <div>
-          <label className="text-xs text-slate-500">Deadline</label>
-          <input name="deadline" placeholder="Deadline" type="date" className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2" />
-        </div>
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        <button type="submit" className="rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm">
-          Сохранить
-        </button>
+        <Input name="deadline" label="Deadline" type="date" />
+        {error && <p className={styles.error}>{error}</p>}
+        <Button type="submit">Сохранить</Button>
       </form>
     </Layout>
   );

@@ -1,0 +1,8 @@
+.loading {
+  display: grid;
+  gap: 12px;
+}
+
+.loading .skeleton {
+  height: 48px;
+}

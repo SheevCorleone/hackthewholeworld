@@ -1,7 +1,8 @@
 .hero {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
+  gap: 32px;
+  align-items: center;
 }
 
 .pills {
@@ -10,15 +11,34 @@
   flex-wrap: wrap;
 }
 
-.title {
-  font-size: 32px;
+.pill {
+  background: var(--green-100);
+  color: var(--green-700);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
   font-weight: 600;
-  line-height: 1.2;
+}
+
+.pillAlt {
+  background: var(--blue-100);
+  color: var(--blue-600);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.title {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.15;
   margin: 0;
 }
 
 .lead {
   color: var(--muted-600);
+  font-size: 16px;
 }
 
 .actions {
@@ -27,8 +47,22 @@
   gap: 12px;
 }
 
+.infoCard {
+  background: var(--card-0);
+  border: 1px solid var(--border-200);
+  border-radius: var(--radius-20);
+  padding: 28px;
+  box-shadow: var(--shadow-1);
+  animation: fadeInUp 0.25s ease;
+}
+
+.cardTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+
 .cardList {
-  margin-top: 16px;
   display: grid;
   gap: 8px;
   color: var(--muted-600);
@@ -37,9 +71,9 @@
 
 .note {
   margin-top: 18px;
-  background: var(--green-100);
+  background: rgba(47, 143, 233, 0.12);
   border-radius: var(--radius-12);
   padding: 12px 14px;
-  color: var(--green-700);
+  color: var(--blue-600);
   font-size: 12px;
 }

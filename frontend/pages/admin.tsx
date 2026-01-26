@@ -13,7 +13,7 @@ interface UserRow {
   role: string;
 }
 
-const roles = ["student", "teacher", "mentor", "curator", "tech_admin", "admin"];
+const roles = ["student", "mentor", "curator", "manager", "admin"];
 
 export default function AdminPage() {
   const [users, setUsers] = useState<UserRow[]>([]);
@@ -47,7 +47,7 @@ export default function AdminPage() {
       <p className={styles.subtitle}>Управление ролями и доступом пользователей.</p>
       {error && <ErrorText style={{ marginTop: "12px" }}>{error}</ErrorText>}
       <Card className={styles.tableWrap}>
-        <table className="table">
+        <table className={styles.table}>
           <thead>
             <tr>
               <th>ФИО</th>

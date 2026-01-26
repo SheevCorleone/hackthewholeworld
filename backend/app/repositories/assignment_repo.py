@@ -32,6 +32,10 @@ def list_assignments_for_student(db: Session, student_id: int, skip: int, limit:
     )
 
 
+def list_assignments_for_task(db: Session, task_id: int):
+    return db.query(Assignment).filter(Assignment.task_id == task_id).all()
+
+
 def update_assignment(db: Session, assignment: Assignment) -> Assignment:
     db.add(assignment)
     db.commit()
