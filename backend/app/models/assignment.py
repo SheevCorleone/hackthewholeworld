@@ -24,9 +24,5 @@ class Assignment(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     task = relationship("Task", back_populates="assignments")
-    student = relationship("User", back_populates="assignments", foreign_keys=[student_id])
-    decided_by_user = relationship(
-        "User",
-        back_populates="decided_assignments",
-        foreign_keys=[decided_by],
-    )
+    student = relationship("User", back_populates="assignments")
+    decided_by_user = relationship("User", foreign_keys=[decided_by])
