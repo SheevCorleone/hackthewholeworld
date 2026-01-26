@@ -1,34 +1,33 @@
 function getApiBaseUrl(): string {
+  // В браузере ВСЕГДА ходим в backend по localhost:8000 (или по env, если задано)
   if (typeof window !== "undefined") {
-    return `${window.location.origin}/api/v1`;
+    return process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
   }
+  // На сервере (SSR) тоже берём env или дефолт
   return process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 }
 
 export const API_URL = getApiBaseUrl();
 
 function getHealthUrl(): string {
-  if (typeof window !== "undefined") {
-    return `${window.location.origin}/backend-health`;
-  }
   return "http://localhost:8000/health";
 }
 
 export async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
-  const headers = {
+
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {})
-  } as Record<string, string>;
+    Accept: "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(options.headers as Record<string, string> | undefined),
+  };
 
   let response: Response;
   try {
     response = await fetch(`${API_URL}${path}`, {
       ...options,
-      headers: {
-        ...headers,
-        ...(options.headers || {})
-      }
+      headers,
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -47,10 +46,15 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
     if (response.status === 403 && typeof window !== "undefined") {
       window.location.href = "/403";
     }
+
     const message = await response.json().catch(() => ({ detail: "Request failed" }));
-    const detail = typeof message.detail === "string" ? message.detail : message.detail?.[0]?.msg || "Request failed";
+    const detail =
+      typeof message.detail === "string" ? message.detail : message.detail?.[0]?.msg || "Request failed";
     throw new Error(detail);
   }
+
+  // если вдруг 204
+  if (response.status === 204) return undefined as unknown as T;
 
   return response.json();
 }
