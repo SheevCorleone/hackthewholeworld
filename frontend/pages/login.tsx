@@ -2,6 +2,9 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/router";
 import Layout from "../components/Layout";
 import { apiRequest } from "../components/api";
+import Input from "../components/Input";
+import Button from "../components/Button";
+import styles from "../styles/Auth.module.css";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -23,7 +26,15 @@ export default function LoginPage() {
       });
       localStorage.setItem("access_token", data.access_token);
       localStorage.setItem("refresh_token", data.refresh_token);
-      router.push("/dashboard");
+      const me = await apiRequest<{ role: string }>("/auth/me");
+      const roleRedirects: Record<string, string> = {
+        manager: "/manager",
+        admin: "/manager",
+        curator: "/curator/projects",
+        student: "/student/projects",
+        mentor: "/mentor/projects"
+      };
+      router.push(roleRedirects[me.role] || "/login");
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -33,23 +44,19 @@ export default function LoginPage() {
 
   return (
     <Layout>
-      <div className="mx-auto max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <h1 className="text-2xl font-semibold">Вход</h1>
-        <p className="mt-2 text-sm text-slate-500">Доступ к задачам и статусам вашей команды.</p>
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <div>
-            <label className="text-xs text-slate-500">Email</label>
-            <input name="email" type="email" placeholder="team@sber.ru" className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2" required />
-          </div>
-          <div>
-            <label className="text-xs text-slate-500">Password</label>
-            <input name="password" type="password" placeholder="••••••••" className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2" required />
-          </div>
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          <button type="submit" disabled={loading} className="w-full rounded-full bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm">
-            {loading ? "Входим..." : "Войти"}
-          </button>
-        </form>
+      <div className={styles.wrapper}>
+        <div className={styles.card}>
+          <h1 className={styles.title}>Вход</h1>
+          <p className={styles.subtitle}>Доступ к задачам и статусам вашей команды.</p>
+          <form onSubmit={handleSubmit} className={styles.form}>
+            <Input name="email" type="email" label="Email" placeholder="team@sber.ru" required />
+            <Input name="password" type="password" label="Password" placeholder="••••••••" required />
+            {error && <p className={styles.error}>{error}</p>}
+            <Button type="submit" loading={loading} style={{ width: "100%" }}>
+              {loading ? "Входим..." : "Войти"}
+            </Button>
+          </form>
+        </div>
       </div>
     </Layout>
   );

@@ -15,27 +15,28 @@
 .headerInner {
   max-width: 1120px;
   margin: 0 auto;
-  padding: 18px 20px;
+  padding: 16px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
 }
 
 .logo {
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.02em;
 }
 
 .nav {
   display: flex;
   align-items: center;
-  gap: 16px;
-  font-size: 14px;
+  gap: 14px;
+  font-size: 13px;
   color: var(--muted-600);
 }
 
 .navLink {
-  transition: color 0.2s ease;
+  transition: color var(--transition-base);
 }
 
 .navLink:hover {
@@ -45,7 +46,14 @@
 .container {
   max-width: 1120px;
   margin: 0 auto;
-  padding: 28px 20px 48px;
+  padding: 32px 20px 48px;
+}
+
+@media (max-width: 880px) {
+  .nav {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
 }
 
 @media (max-width: 720px) {

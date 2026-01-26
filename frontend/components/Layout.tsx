@@ -1,31 +1,74 @@
 import Link from "next/link";
 import { ReactNode } from "react";
+import Button from "./Button";
+import styles from "../styles/Layout.module.css";
+import { useAuth } from "./auth";
+
+const navByRole: Record<string, { label: string; href: string }[]> = {
+  manager: [
+    { label: "Дашборд", href: "/manager" },
+    { label: "Проекты", href: "/manager/projects" },
+    { label: "Студенты", href: "/manager/students" },
+    { label: "Менторы", href: "/manager/mentors" },
+    { label: "Кураторы", href: "/manager/curators/new" },
+    { label: "Рецензии", href: "/manager/reviews" }
+  ],
+  curator: [
+    { label: "Проекты", href: "/curator/projects" }
+  ],
+  student: [
+    { label: "Проекты", href: "/student/projects" },
+    { label: "Принятые", href: "/student/accepted" },
+    { label: "Рецензии", href: "/student/reviews" }
+  ],
+  mentor: [
+    { label: "Проекты", href: "/mentor/projects" },
+    { label: "Рецензии", href: "/mentor/reviews" }
+  ],
+  admin: [
+    { label: "Дашборд", href: "/manager" },
+    { label: "Проекты", href: "/manager/projects" },
+    { label: "Студенты", href: "/manager/students" }
+  ]
+};
 
 export default function Layout({ children }: { children: ReactNode }) {
+  const { user, isAuthenticated, logout } = useAuth();
+  const navLinks = user ? navByRole[user.role] || [] : [];
+
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="border-b border-slate-200 bg-white/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link href="/" className="text-lg font-semibold tracking-tight">
+    <div className={styles.app}>
+      <header className={styles.header}>
+        <div className={styles.headerInner}>
+          <Link href="/" className={styles.logo}>
             SberCollab
           </Link>
-          <nav className="flex items-center gap-4 text-sm text-slate-600">
-            <Link href="/dashboard" className="transition hover:text-slate-900">
-              Dashboard
-            </Link>
-            <Link href="/tasks" className="transition hover:text-slate-900">
-              Tasks
-            </Link>
-            <Link href="/my-tasks" className="transition hover:text-slate-900">
-              My Tasks
-            </Link>
-            <Link href="/login" className="rounded-full border border-slate-200 px-4 py-2 text-slate-700 transition hover:border-slate-300">
-              Logout
-            </Link>
+          <nav className={styles.nav}>
+            {isAuthenticated &&
+              navLinks.map((link) => (
+                <Link key={link.href} href={link.href} className={styles.navLink}>
+                  {link.label}
+                </Link>
+              ))}
+            {!isAuthenticated && (
+              <>
+                <Link href="/login" className={styles.navLink}>
+                  LOGIN
+                </Link>
+                <Link href="/register" className={styles.navLink}>
+                  REGISTER
+                </Link>
+              </>
+            )}
+            {isAuthenticated && (
+              <Button variant="secondary" size="sm" onClick={logout}>
+                LOGOUT
+              </Button>
+            )}
           </nav>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-6 py-10">{children}</main>
+      <main className={`${styles.container} page-enter`}>{children}</main>
     </div>
   );
 }

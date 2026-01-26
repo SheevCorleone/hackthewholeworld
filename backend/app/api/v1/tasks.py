@@ -16,7 +16,7 @@ router = APIRouter(prefix="/tasks", tags=["tasks"])
 def create_task_endpoint(
     payload: TaskCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles("curator", "admin")),
+    current_user: User = Depends(require_roles("curator", "manager", "admin")),
 ):
     return create_task(db, payload, current_user.id)
 
@@ -47,7 +47,7 @@ def update_task_endpoint(
     task_id: int,
     payload: TaskUpdate,
     db: Session = Depends(get_db),
-    _: User = Depends(require_roles("curator", "admin")),
+    _: User = Depends(require_roles("curator", "manager", "admin")),
 ):
     task = task_repo.get_task(db, task_id)
     if not task:
@@ -59,7 +59,7 @@ def update_task_endpoint(
 def delete_task_endpoint(
     task_id: int,
     db: Session = Depends(get_db),
-    _: User = Depends(require_roles("curator", "admin")),
+    _: User = Depends(require_roles("curator", "manager", "admin")),
 ):
     task = task_repo.get_task(db, task_id)
     if not task:

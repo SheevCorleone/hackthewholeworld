@@ -11,6 +11,10 @@ def list_users(db: Session, skip: int, limit: int):
     return db.query(User).offset(skip).limit(limit).all()
 
 
+def list_users_by_role(db: Session, role: str, skip: int, limit: int):
+    return db.query(User).filter(User.role == role).offset(skip).limit(limit).all()
+
+
 def create_user(db: Session, user: User) -> User:
     db.add(user)
     db.commit()

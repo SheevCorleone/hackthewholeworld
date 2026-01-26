@@ -2,6 +2,10 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Layout from "../../components/Layout";
 import { apiRequest } from "../../components/api";
+import Card from "../../components/Card";
+import Input from "../../components/Input";
+import Button from "../../components/Button";
+import styles from "../../styles/TaskDetail.module.css";
 
 interface Task {
   id: number;
@@ -66,46 +70,43 @@ export default function TaskDetailPage() {
 
   return (
     <Layout>
-      {error && <p className="text-red-600">{error}</p>}
+      {error && <p className={styles.error}>{error}</p>}
       {task && (
-        <div className="space-y-6">
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-semibold">{task.title}</h1>
-              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs uppercase">{task.status}</span>
+        <div className={styles.wrapper}>
+          <Card>
+            <div className={styles.header}>
+              <h1 className={styles.title}>{task.title}</h1>
+              <span className={styles.status}>{task.status}</span>
             </div>
-            <p className="mt-4 text-sm text-slate-600">{task.description}</p>
-            <div className="mt-4 flex flex-wrap gap-4 text-xs text-slate-500">
-              <span className="rounded-full border border-slate-200 px-3 py-1">Mentor: {task.mentor_id ?? "TBD"}</span>
-              <span className="rounded-full border border-slate-200 px-3 py-1">Tags: {task.tags || "—"}</span>
+            <p className={styles.description}>{task.description}</p>
+            <div className={styles.meta}>
+              <span className={styles.metaPill}>Mentor: {task.mentor_id ?? "TBD"}</span>
+              <span className={styles.metaPill}>Tags: {task.tags || "—"}</span>
             </div>
-            <button onClick={requestAssignment} className="mt-6 rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm">
-              Взять в работу
-            </button>
-          </div>
+            <Button onClick={requestAssignment}>Взять в работу</Button>
+          </Card>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold">Комментарии</h2>
-            <div className="mt-4 flex gap-2">
-              <input
+          <Card>
+            <h2>Комментарии</h2>
+            <div className={styles.commentBox}>
+              <Input
                 value={commentBody}
                 onChange={(event) => setCommentBody(event.target.value)}
                 placeholder="Оставить комментарий"
-                className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm"
               />
-              <button onClick={submitComment} className="rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white">
+              <Button variant="secondary" onClick={submitComment}>
                 Отправить
-              </button>
+              </Button>
             </div>
-            <ul className="mt-4 space-y-3 text-sm text-slate-600">
+            <ul className={styles.commentList}>
               {comments.map((comment) => (
-                <li key={comment.id} className="rounded-xl border border-slate-200 p-3">
+                <Card key={comment.id}>
                   <p>{comment.body}</p>
-                  <span className="text-xs text-slate-400">Author {comment.author_id}</span>
-                </li>
+                  <span className={styles.commentMeta}>Author {comment.author_id}</span>
+                </Card>
               ))}
             </ul>
-          </div>
+          </Card>
         </div>
       )}
     </Layout>
