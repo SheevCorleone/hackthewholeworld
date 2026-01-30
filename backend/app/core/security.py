@@ -17,13 +17,17 @@ def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
 
-def create_access_token(subject: str, role: str) -> str:
+def create_access_token(subject: str, role: str, token_version: int | None = None) -> str:
     expire = datetime.utcnow() + timedelta(minutes=settings.access_token_expire_minutes)
     to_encode = {"exp": expire, "sub": str(subject), "role": role}
+    if token_version is not None:
+        to_encode["token_version"] = token_version
     return jwt.encode(to_encode, settings.secret_key, algorithm="HS256")
 
 
-def create_refresh_token(subject: str, role: str) -> str:
+def create_refresh_token(subject: str, role: str, token_version: int | None = None) -> str:
     expire = datetime.utcnow() + timedelta(minutes=settings.refresh_token_expire_minutes)
     to_encode = {"exp": expire, "sub": str(subject), "role": role, "type": "refresh"}
+    if token_version is not None:
+        to_encode["token_version"] = token_version
     return jwt.encode(to_encode, settings.secret_key, algorithm="HS256")

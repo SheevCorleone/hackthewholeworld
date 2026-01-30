@@ -67,6 +67,6 @@ def authenticate_user(db: Session, email: str, password: str) -> tuple[str, str]
     db.add(user)
     db.commit()
     log_action(db, actor_id=user.id, action="user_login", entity_type="user", entity_id=user.id)
-    access = create_access_token(str(user.id), user.role)
-    refresh = create_refresh_token(str(user.id), user.role)
+    access = create_access_token(str(user.id), user.role, user.token_version)
+    refresh = create_refresh_token(str(user.id), user.role, user.token_version)
     return access, refresh
