@@ -66,3 +66,16 @@ def delete_task_endpoint(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
     task_repo.delete_task(db, task)
     return {"message": "Task deleted"}
+
+
+@router.post("/{task_id}/archive", response_model=TaskRead)
+def archive_task_endpoint(
+    task_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("curator", "manager", "admin")),
+):
+    task = task_repo.get_task(db, task_id)
+    if not task:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
+    task.status = "closed"
+    return update_task(db, task, TaskUpdate(status="closed"))

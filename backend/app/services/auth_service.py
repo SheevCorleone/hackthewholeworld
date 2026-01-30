@@ -11,7 +11,13 @@ from app.services.audit_service import log_action
 def register_user(db: Session, email: str, full_name: str, password: str) -> User:
     if user_repo.get_by_email(db, email):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
-    user = User(email=email, full_name=full_name, password_hash=get_password_hash(password), role="student")
+    user = User(
+        email=email,
+        full_name=full_name,
+        password_hash=get_password_hash(password),
+        role="student",
+        status="pending",
+    )
     created = user_repo.create_user(db, user)
     log_action(db, actor_id=created.id, action="user_registered", entity_type="user", entity_id=created.id)
     return created
@@ -27,6 +33,7 @@ def create_user_with_role(
     faculty: str | None = None,
     skills: str | None = None,
     course: str | None = None,
+    status: str | None = "active",
 ) -> User:
     if user_repo.get_by_email(db, email):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
@@ -35,6 +42,7 @@ def create_user_with_role(
         full_name=full_name,
         password_hash=get_password_hash(password),
         role=role,
+        status=status or "active",
         faculty=faculty,
         skills=skills,
         course=course,
@@ -48,6 +56,13 @@ def authenticate_user(db: Session, email: str, password: str) -> tuple[str, str]
     user = user_repo.get_by_email(db, email)
     if not user or not verify_password(password, user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+    if user.status != "active":
+        if user.status == "disabled":
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account is disabled")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account is pending approval",
+        )
     user.last_active_at = datetime.utcnow()
     db.add(user)
     db.commit()

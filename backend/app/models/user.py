@@ -29,6 +29,11 @@ class User(Base):
         default="student",
         index=True,
     )
+    status: Mapped[str] = mapped_column(
+        Enum("pending", "active", "disabled", name="user_status"),
+        default="pending",
+        index=True,
+    )
     avatar_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     faculty: Mapped[str | None] = mapped_column(String(255), nullable=True)
     skills: Mapped[str | None] = mapped_column(String(500), nullable=True)

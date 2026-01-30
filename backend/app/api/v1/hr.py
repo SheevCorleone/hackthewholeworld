@@ -17,7 +17,7 @@ def hr_dashboard(
     db: Session = Depends(get_db),
     _: User = Depends(require_roles("hr", "manager", "admin")),
 ):
-    students = db.query(User).filter(User.role == "student").all()
+    students = db.query(User).filter(User.role == "student", User.status == "active").all()
     response: list[HrStudentSummary] = []
     for student in students:
         completed = (

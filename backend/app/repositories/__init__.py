@@ -5,6 +5,7 @@ from app.repositories import (
     comment_repo,
     portfolio_repo,
     review_repo,
+    task_mentor_repo,
     task_repo,
     user_repo,
 )
@@ -16,6 +17,7 @@ __all__ = [
     "comment_repo",
     "portfolio_repo",
     "review_repo",
+    "task_mentor_repo",
     "task_repo",
     "user_repo",
 ]

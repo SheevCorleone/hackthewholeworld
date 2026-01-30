@@ -20,6 +20,6 @@ def log_action(
         action=action,
         entity_type=entity_type,
         entity_id=entity_id,
-        metadata=payload,
+        metadata_json=payload,
     )
     return audit_log_repo.create_audit_log(db, audit_log)

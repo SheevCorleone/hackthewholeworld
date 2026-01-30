@@ -9,6 +9,8 @@ class PortfolioEntryRead(BaseModel):
     task_id: int
     assignment_id: int
     summary: str | None = None
+    review_rating: int | None = None
+    review_comment: str | None = None
     created_at: datetime
 
     class Config:

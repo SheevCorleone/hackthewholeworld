@@ -38,5 +38,6 @@ class Task(Base):
 
     created_by_user = relationship("User", back_populates="created_tasks", foreign_keys=[created_by])
     mentor = relationship("User", back_populates="mentored_tasks", foreign_keys=[mentor_id])
+    mentor_links = relationship("TaskMentor", back_populates="task", cascade="all, delete-orphan")
     assignments = relationship("Assignment", back_populates="task")
     comments = relationship("Comment", back_populates="task")

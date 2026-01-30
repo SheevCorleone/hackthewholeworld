@@ -20,6 +20,7 @@ class UserCreate(UserBase):
 class UserRead(UserBase):
     id: int
     role: str
+    status: str
     created_at: datetime
     last_active_at: datetime | None = None
 

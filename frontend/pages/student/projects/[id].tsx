@@ -33,6 +33,15 @@ type Question = {
   meeting_info?: string | null;
 };
 
+type TeamMember = {
+  user_id: number;
+  full_name: string;
+  role_in_team?: string | null;
+  contact_email?: string | null;
+  linkedin_url?: string | null;
+  github_url?: string | null;
+};
+
 export default function StudentProjectDetailPage() {
   const router = useRouter();
   const { id } = router.query;
@@ -41,6 +50,7 @@ export default function StudentProjectDetailPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [ndaAccepted, setNdaAccepted] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [team, setTeam] = useState<TeamMember[]>([]);
   const [questionBody, setQuestionBody] = useState("");
   const [questionPrivate, setQuestionPrivate] = useState(false);
   const [recipientId, setRecipientId] = useState("");
@@ -52,6 +62,7 @@ export default function StudentProjectDetailPage() {
       .then(setProject)
       .catch((err) => setError(err.message));
     apiRequest<Question[]>(`/questions?task_id=${id}`).then(setQuestions).catch(() => null);
+    apiRequest<TeamMember[]>(`/projects/${id}/team`).then(setTeam).catch(() => null);
   }, [id]);
 
   const apply = async () => {
@@ -136,6 +147,23 @@ export default function StudentProjectDetailPage() {
               )}
               <Button onClick={apply}>Подать заявку</Button>
               {message && <p>{message}</p>}
+            </Card>
+            <Card>
+              <h2>Команда проекта</h2>
+              {team.length === 0 && <p>Команда пока не сформирована.</p>}
+              {team.length > 0 && (
+                <ul className={styles.commentList}>
+                  {team.map((member) => (
+                    <Card key={member.user_id}>
+                      <strong>{member.full_name}</strong>
+                      {member.role_in_team && <div>Роль: {member.role_in_team}</div>}
+                      <div>Email: {member.contact_email || "Доступ после подтверждения"}</div>
+                      {member.linkedin_url && <div>LinkedIn: {member.linkedin_url}</div>}
+                      {member.github_url && <div>GitHub: {member.github_url}</div>}
+                    </Card>
+                  ))}
+                </ul>
+              )}
             </Card>
             <Card>
               <h2>Q&A</h2>

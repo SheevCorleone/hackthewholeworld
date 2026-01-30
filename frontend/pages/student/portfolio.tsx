@@ -10,6 +10,8 @@ type PortfolioEntry = {
   task_id: number;
   assignment_id: number;
   summary?: string | null;
+  review_rating?: number | null;
+  review_comment?: string | null;
   created_at: string;
 };
 
@@ -37,6 +39,8 @@ export default function StudentPortfolioPage() {
             <strong>Проект #{entry.task_id}</strong>
             <div>Заявка #{entry.assignment_id}</div>
             <div>{entry.summary || "Без описания"}</div>
+            {entry.review_rating && <div>Рейтинг: {entry.review_rating}</div>}
+            {entry.review_comment && <div>Отзыв: {entry.review_comment}</div>}
           </Card>
         ))}
       </Layout>

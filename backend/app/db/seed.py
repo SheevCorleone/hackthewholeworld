@@ -30,6 +30,7 @@ def seed():
                 full_name=name,
                 password="changeme123",
                 role=role_name,
+                status="active",
             )
 
         if not task_repo.list_tasks(db, 0, 1, None, None, None):

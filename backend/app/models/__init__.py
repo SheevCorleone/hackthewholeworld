@@ -5,6 +5,7 @@ from app.models.comment import Comment
 from app.models.portfolio_entry import PortfolioEntry
 from app.models.review import Review
 from app.models.task import Task
+from app.models.task_mentor import TaskMentor
 from app.models.user import User
 from app.models.user_skill import UserSkill
 
@@ -16,6 +17,7 @@ __all__ = [
     "PortfolioEntry",
     "Review",
     "Task",
+    "TaskMentor",
     "User",
     "UserSkill",
 ]

@@ -89,6 +89,11 @@ The seed script creates the following users (password: `changeme123`):
 
 Additional roles: `univ_supervisor`, `univ_admin`, `academic_partnership_admin`.
 
+## Student approval flow
+- Регистрация открыта только для роли `student`, статус `pending`.
+- Менеджер подтверждает студента через `/manager/students/pending`.
+- До подтверждения логин возвращает `403` с сообщением о модерации.
+
 ## NDA workflow (MVP)
 - При подаче заявки на проект с `nda_required=true` нужно подтвердить NDA (checkbox на фронтенде).
 - В production‑версии планируется юридическое подписание (PDF + e‑signature).

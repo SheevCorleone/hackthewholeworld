@@ -16,6 +16,7 @@ export type User = {
     | "univ_admin"
     | "hr"
     | "academic_partnership_admin";
+  status?: string;
   faculty?: string | null;
   skills?: string | null;
   course?: string | null;

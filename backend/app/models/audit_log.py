@@ -14,7 +14,7 @@ class AuditLog(Base):
     action: Mapped[str] = mapped_column(String(255), index=True)
     entity_type: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
     entity_id: Mapped[int | None] = mapped_column(nullable=True, index=True)
-    metadata: Mapped[str | None] = mapped_column(Text, nullable=True)
+    metadata_json: Mapped[str | None] = mapped_column("metadata", Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     actor = relationship("User")

@@ -4,6 +4,7 @@ import Layout from "../../../components/Layout";
 import RouteGuard from "../../../components/RouteGuard";
 import Card from "../../../components/Card";
 import { apiRequest } from "../../../components/api";
+import Button from "../../../components/Button";
 import styles from "../../../styles/Tasks.module.css";
 
 type Project = {
@@ -16,19 +17,29 @@ type Project = {
 
 export default function StudentProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [page, setPage] = useState(0);
+  const [query, setQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    apiRequest<Project[]>("/projects")
+    apiRequest<Project[]>(`/projects?skip=${page * 12}&limit=12&query=${query}`)
       .then(setProjects)
       .catch((err) => setError(err.message));
-  }, []);
+  }, [page, query]);
 
   return (
     <RouteGuard roles={["student"]}>
       <Layout>
         <div className={styles.header}>
           <h1 className={styles.title}>Доступные проекты</h1>
+        </div>
+        <div className={styles.filters}>
+          <input
+            className={styles.search}
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Поиск по названию"
+          />
         </div>
         {error && <p className={styles.error}>{error}</p>}
         <div className={styles.list}>
@@ -44,6 +55,15 @@ export default function StudentProjectsPage() {
               </Card>
             </Link>
           ))}
+        </div>
+        <div className={styles.pagination}>
+          <Button size="sm" variant="ghost" onClick={() => setPage((prev) => Math.max(prev - 1, 0))} disabled={page === 0}>
+            Назад
+          </Button>
+          <span>Страница {page + 1}</span>
+          <Button size="sm" variant="ghost" onClick={() => setPage((prev) => prev + 1)} disabled={projects.length < 12}>
+            Вперёд
+          </Button>
         </div>
       </Layout>
     </RouteGuard>

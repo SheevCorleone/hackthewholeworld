@@ -19,6 +19,7 @@
 - **Портфолио студента** → `PortfolioEntry` + `/portfolio/me`.【F:backend/app/models/portfolio_entry.py†L1-L23】【F:backend/app/api/v1/portfolio.py†L1-L16】
 - **Расширенное Q&A** → расширение `Comment` (is_private/recipient/meeting_info), `/questions`.【F:backend/app/models/comment.py†L10-L17】【F:backend/app/api/v1/questions.py†L1-L55】
 - **Аналитика** → расширенный `manager` dashboard, `hr` dashboard, расчёт рейтингов через `Review`.【F:backend/app/api/v1/manager.py†L25-L84】【F:backend/app/api/v1/hr.py†L1-L40】
+- **Подтверждение студентов** → статус пользователя `pending/active/disabled` и менеджерские решения в `/manager` (approvals).【F:backend/app/models/user.py†L13-L33】【F:backend/app/api/v1/manager.py†L185-L239】
 
 ## 1.3 ER‑диаграмма (текст)
 - **users** (1) —< **tasks** (created_by), (1) —< **tasks** (mentor_id)
