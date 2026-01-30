@@ -11,6 +11,15 @@ class Task(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(String(255), index=True)
     description: Mapped[str] = mapped_column(Text)
+    goal: Mapped[str | None] = mapped_column(Text, nullable=True)
+    key_tasks: Mapped[str | None] = mapped_column(Text, nullable=True)
+    novelty: Mapped[str | None] = mapped_column(Text, nullable=True)
+    skills_required: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    course_alignment: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    diploma_possible: Mapped[bool] = mapped_column(default=False)
+    practice_possible: Mapped[bool] = mapped_column(default=False)
+    course_project_possible: Mapped[bool] = mapped_column(default=False)
+    nda_required: Mapped[bool] = mapped_column(default=False)
     tags: Mapped[str | None] = mapped_column(String(255), index=True)
     status: Mapped[str] = mapped_column(
         Enum("open", "in_progress", "completed", "closed", name="task_status"),
@@ -29,5 +38,6 @@ class Task(Base):
 
     created_by_user = relationship("User", back_populates="created_tasks", foreign_keys=[created_by])
     mentor = relationship("User", back_populates="mentored_tasks", foreign_keys=[mentor_id])
+    mentor_links = relationship("TaskMentor", back_populates="task", cascade="all, delete-orphan")
     assignments = relationship("Assignment", back_populates="task")
     comments = relationship("Comment", back_populates="task")

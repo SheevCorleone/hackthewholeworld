@@ -9,6 +9,7 @@ class StudentSummary(BaseModel):
     faculty: str | None = None
     skills: str | None = None
     course: str | None = None
+    status: str | None = None
     created_at: datetime
     last_active_at: datetime | None = None
 
@@ -52,6 +53,7 @@ class ApplicationWithStudent(BaseModel):
     task_id: int
     student_id: int
     state: str
+    team_role: str | None = None
     decision_at: datetime | None = None
     decided_by: int | None = None
     decision_reason: str | None = None

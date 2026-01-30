@@ -9,6 +9,8 @@ class UserBase(BaseModel):
     skills: str | None = None
     course: str | None = None
     avatar_url: str | None = None
+    linkedin_url: str | None = None
+    github_url: str | None = None
 
 
 class UserCreate(UserBase):
@@ -18,6 +20,7 @@ class UserCreate(UserBase):
 class UserRead(UserBase):
     id: int
     role: str
+    status: str
     created_at: datetime
     last_active_at: datetime | None = None
 

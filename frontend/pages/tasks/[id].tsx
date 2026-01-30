@@ -11,6 +11,15 @@ interface Task {
   id: number;
   title: string;
   description: string;
+  goal?: string | null;
+  key_tasks?: string | null;
+  novelty?: string | null;
+  skills_required?: string | null;
+  course_alignment?: string | null;
+  diploma_possible?: boolean | null;
+  practice_possible?: boolean | null;
+  course_project_possible?: boolean | null;
+  nda_required?: boolean | null;
   status: string;
   tags?: string;
   mentor_id?: number | null;
@@ -21,6 +30,9 @@ interface Comment {
   body: string;
   author_id: number;
   created_at: string;
+  is_private: boolean;
+  recipient_id?: number | null;
+  meeting_info?: string | null;
 }
 
 export default function TaskDetailPage() {
@@ -28,7 +40,13 @@ export default function TaskDetailPage() {
   const { id } = router.query;
   const [task, setTask] = useState<Task | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
+  const [questions, setQuestions] = useState<Comment[]>([]);
   const [commentBody, setCommentBody] = useState("");
+  const [questionBody, setQuestionBody] = useState("");
+  const [questionPrivate, setQuestionPrivate] = useState(false);
+  const [recipientId, setRecipientId] = useState("");
+  const [meetingInfo, setMeetingInfo] = useState("");
+  const [ndaAccepted, setNdaAccepted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -39,6 +57,9 @@ export default function TaskDetailPage() {
     apiRequest<Comment[]>(`/comments?task_id=${id}`)
       .then(setComments)
       .catch(() => null);
+    apiRequest<Comment[]>(`/questions?task_id=${id}`)
+      .then(setQuestions)
+      .catch(() => null);
   }, [id]);
 
   const requestAssignment = async () => {
@@ -46,7 +67,7 @@ export default function TaskDetailPage() {
     try {
       await apiRequest("/assignments", {
         method: "POST",
-        body: JSON.stringify({ task_id: Number(id) })
+        body: JSON.stringify({ task_id: Number(id), nda_accepted: ndaAccepted })
       });
       alert("Запрос отправлен");
     } catch (err) {
@@ -68,6 +89,28 @@ export default function TaskDetailPage() {
     }
   };
 
+  const submitQuestion = async () => {
+    if (!questionBody.trim()) return;
+    try {
+      const newQuestion = await apiRequest<Comment>("/questions", {
+        method: "POST",
+        body: JSON.stringify({
+          task_id: Number(id),
+          body: questionBody,
+          is_private: questionPrivate,
+          recipient_id: recipientId ? Number(recipientId) : null,
+          meeting_info: meetingInfo || null
+        })
+      });
+      setQuestions([newQuestion, ...questions]);
+      setQuestionBody("");
+      setRecipientId("");
+      setMeetingInfo("");
+    } catch (err) {
+      alert((err as Error).message);
+    }
+  };
+
   return (
     <Layout>
       {error && <p className={styles.error}>{error}</p>}
@@ -79,10 +122,41 @@ export default function TaskDetailPage() {
               <span className={styles.status}>{task.status}</span>
             </div>
             <p className={styles.description}>{task.description}</p>
+            {task.goal && <p className={styles.description}>Цель: {task.goal}</p>}
+            {task.key_tasks && <p className={styles.description}>Ключевые задачи: {task.key_tasks}</p>}
+            {task.novelty && <p className={styles.description}>Новизна: {task.novelty}</p>}
             <div className={styles.meta}>
               <span className={styles.metaPill}>Mentor: {task.mentor_id ?? "TBD"}</span>
               <span className={styles.metaPill}>Tags: {task.tags || "—"}</span>
             </div>
+            <div className={styles.meta}>
+              <span className={styles.metaPill}>Навыки: {task.skills_required || "—"}</span>
+              <span className={styles.metaPill}>Учебная программа: {task.course_alignment || "—"}</span>
+            </div>
+            <div className={styles.meta}>
+              <span className={styles.metaPill}>
+                Диплом: {task.diploma_possible ? "да" : "нет"}
+              </span>
+              <span className={styles.metaPill}>
+                Практика: {task.practice_possible ? "да" : "нет"}
+              </span>
+              <span className={styles.metaPill}>
+                Курсовой: {task.course_project_possible ? "да" : "нет"}
+              </span>
+              <span className={styles.metaPill}>
+                NDA: {task.nda_required ? "требуется" : "нет"}
+              </span>
+            </div>
+            {task.nda_required && (
+              <label className={styles.checkboxRow}>
+                <input
+                  type="checkbox"
+                  checked={ndaAccepted}
+                  onChange={(event) => setNdaAccepted(event.target.checked)}
+                />
+                Я согласен с NDA
+              </label>
+            )}
             <Button onClick={requestAssignment}>Взять в работу</Button>
           </Card>
 
@@ -103,6 +177,50 @@ export default function TaskDetailPage() {
                 <Card key={comment.id}>
                   <p>{comment.body}</p>
                   <span className={styles.commentMeta}>Author {comment.author_id}</span>
+                </Card>
+              ))}
+            </ul>
+          </Card>
+
+          <Card>
+            <h2>Q&A</h2>
+            <div className={styles.commentBox}>
+              <Input
+                value={questionBody}
+                onChange={(event) => setQuestionBody(event.target.value)}
+                placeholder="Задать вопрос"
+              />
+              <label className={styles.checkboxRow}>
+                <input
+                  type="checkbox"
+                  checked={questionPrivate}
+                  onChange={(event) => setQuestionPrivate(event.target.checked)}
+                />
+                Приватный вопрос
+              </label>
+              <Input
+                value={recipientId}
+                onChange={(event) => setRecipientId(event.target.value)}
+                placeholder="ID получателя (опционально)"
+              />
+              <Input
+                value={meetingInfo}
+                onChange={(event) => setMeetingInfo(event.target.value)}
+                placeholder="Назначить встречу (ссылка/время)"
+              />
+              <Button variant="secondary" onClick={submitQuestion}>
+                Отправить
+              </Button>
+            </div>
+            <ul className={styles.commentList}>
+              {questions.map((question) => (
+                <Card key={question.id}>
+                  <p>{question.body}</p>
+                  {question.is_private && <span className={styles.metaPill}>Private</span>}
+                  {question.meeting_info && (
+                    <div className={styles.commentMeta}>Встреча: {question.meeting_info}</div>
+                  )}
+                  <span className={styles.commentMeta}>Author {question.author_id}</span>
                 </Card>
               ))}
             </ul>

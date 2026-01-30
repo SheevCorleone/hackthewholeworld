@@ -20,6 +20,15 @@ docker-compose up --build
 
 Backend will run on `http://localhost:8000` and frontend on `http://localhost:3000`.
 
+### Seed data (optional)
+
+```bash
+cd backend
+python -m app.db.seed
+```
+
+Creates demo users and a sample project with approval request.
+
 ## Local dev (without Docker)
 
 ```bash
@@ -68,6 +77,29 @@ frontend/
 
 ## API base
 `/api/v1`
+
+## Roles (demo logins)
+
+The seed script creates the following users (password: `changeme123`):
+- manager@sberlab.local (manager)
+- mentor@sberlab.local (mentor)
+- student@sberlab.local (student)
+- teacher@sberlab.local (univ_teacher)
+- hr@sberlab.local (hr)
+
+Additional roles: `univ_supervisor`, `univ_admin`, `academic_partnership_admin`.
+
+## Student approval flow
+- Регистрация открыта только для роли `student`, статус `pending`.
+- Менеджер подтверждает студента через `/manager/students/pending`.
+- До подтверждения логин возвращает `403` с сообщением о модерации.
+
+## NDA workflow (MVP)
+- При подаче заявки на проект с `nda_required=true` нужно подтвердить NDA (checkbox на фронтенде).
+- В production‑версии планируется юридическое подписание (PDF + e‑signature).
+
+## Roadmap & ER
+См. документ `docs/sberlab_ngsu_plan.md` для аналитики, ER‑диаграммы и roadmap.
 
 ## Notes
 - Tokens stored in localStorage for MVP simplicity. Consider httpOnly cookies in production.

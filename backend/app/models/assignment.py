@@ -20,10 +20,12 @@ class Assignment(Base):
         default="requested",
         index=True,
     )
+    nda_accepted: Mapped[bool] = mapped_column(default=False)
 
     decision_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     decided_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     decision_reason: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    team_role: Mapped[str | None] = mapped_column(String(100), nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

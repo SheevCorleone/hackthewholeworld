@@ -5,10 +5,23 @@ export type User = {
   id: number;
   email: string;
   full_name: string;
-  role: "manager" | "admin" | "curator" | "student" | "mentor";
+  role:
+    | "manager"
+    | "admin"
+    | "curator"
+    | "student"
+    | "mentor"
+    | "univ_teacher"
+    | "univ_supervisor"
+    | "univ_admin"
+    | "hr"
+    | "academic_partnership_admin";
+  status?: string;
   faculty?: string | null;
   skills?: string | null;
   course?: string | null;
+  linkedin_url?: string | null;
+  github_url?: string | null;
   created_at: string;
   last_active_at?: string | null;
 };

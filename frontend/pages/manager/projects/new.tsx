@@ -24,6 +24,15 @@ export default function ManagerNewProjectPage() {
         body: JSON.stringify({
           title: form.get("title"),
           description: form.get("description"),
+          goal: form.get("goal"),
+          key_tasks: form.get("key_tasks"),
+          novelty: form.get("novelty"),
+          skills_required: form.get("skills_required"),
+          course_alignment: form.get("course_alignment"),
+          diploma_possible: Boolean(form.get("diploma_possible")),
+          practice_possible: Boolean(form.get("practice_possible")),
+          course_project_possible: Boolean(form.get("course_project_possible")),
+          nda_required: Boolean(form.get("nda_required")),
           tags: form.get("tags"),
           deadline: form.get("deadline") || null,
           status: form.get("status") || "open"
@@ -44,9 +53,30 @@ export default function ManagerNewProjectPage() {
         <form onSubmit={handleSubmit} className={styles.formCard}>
           <Input name="title" label="Название проекта" required />
           <Textarea name="description" label="Описание" rows={6} required />
+          <Textarea name="goal" label="Цель проекта" rows={3} />
+          <Textarea name="key_tasks" label="Ключевые задачи" rows={3} />
+          <Textarea name="novelty" label="Новизна/ценность" rows={3} />
           <div className={styles.gridTwo}>
             <Input name="tags" label="Теги" placeholder="analytics, ml" />
             <Input name="deadline" label="Deadline" type="date" />
+          </div>
+          <div className={styles.gridTwo}>
+            <Input name="skills_required" label="Необходимые навыки" placeholder="Python, ML" />
+            <Input name="course_alignment" label="Соответствие программе" placeholder="AI/DS" />
+          </div>
+          <div className={styles.gridTwo}>
+            <label className={styles.checkboxRow}>
+              <input type="checkbox" name="diploma_possible" /> Можно как диплом
+            </label>
+            <label className={styles.checkboxRow}>
+              <input type="checkbox" name="practice_possible" /> Можно как практику
+            </label>
+            <label className={styles.checkboxRow}>
+              <input type="checkbox" name="course_project_possible" /> Можно как курсовой
+            </label>
+            <label className={styles.checkboxRow}>
+              <input type="checkbox" name="nda_required" /> Требуется NDA
+            </label>
           </div>
           <Input name="status" label="Статус" placeholder="open / in_progress / completed" />
           {error && <p className={styles.error}>{error}</p>}

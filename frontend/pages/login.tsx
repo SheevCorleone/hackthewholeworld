@@ -32,11 +32,24 @@ export default function LoginPage() {
         admin: "/manager",
         curator: "/curator/projects",
         student: "/student/projects",
-        mentor: "/mentor/projects"
+        mentor: "/mentor/projects",
+        univ_teacher: "/univ/approvals",
+        univ_supervisor: "/univ/approvals",
+        univ_admin: "/univ/approvals",
+        hr: "/hr/dashboard",
+        academic_partnership_admin: "/manager/projects"
       };
       router.push(roleRedirects[me.role] || "/login");
     } catch (err) {
-      setError((err as Error).message);
+      const message = (err as Error).message;
+      const lower = message.toLowerCase();
+      if (lower.includes("pending")) {
+        setError("Учетная запись ожидает подтверждения менеджером.");
+      } else if (lower.includes("disabled")) {
+        setError("Учетная запись отключена. Обратитесь к менеджеру.");
+      } else {
+        setError(message);
+      }
     } finally {
       setLoading(false);
     }

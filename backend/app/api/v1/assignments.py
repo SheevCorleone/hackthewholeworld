@@ -21,7 +21,7 @@ def create_assignment(
     task = task_repo.get_task(db, payload.task_id)
     if not task:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
-    return request_assignment(db, payload.task_id, current_user.id)
+    return request_assignment(db, task, current_user.id, payload.nda_accepted)
 
 
 @router.get("/me", response_model=list[AssignmentRead])
