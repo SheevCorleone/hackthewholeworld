@@ -18,7 +18,7 @@ def upgrade():
     op.execute("CREATE TYPE user_status AS ENUM ('pending', 'active', 'disabled')")
     op.add_column(
         "users",
-        sa.Column("status", sa.Enum("pending", "active", "disabled", name="user_status"), nullable=False),
+        sa.Column("status", sa.Enum("pending", "active", "disabled", name="user_status"), nullable=True),
     )
     op.create_index("ix_users_status", "users", ["status"])
 
@@ -37,6 +37,7 @@ def upgrade():
     op.create_index("ix_task_mentors_mentor_id", "task_mentors", ["mentor_id"])
 
     op.execute("UPDATE users SET status='active'")
+    op.alter_column("users", "status", nullable=False)
 
 
 def downgrade():
