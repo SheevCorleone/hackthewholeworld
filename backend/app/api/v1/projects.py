@@ -6,7 +6,7 @@ from app.db.session import get_db
 from app.models.task import Task
 from app.models.user import User
 from app.repositories import task_repo
-from app.schemas.assignment import AssignmentRead
+from app.schemas.assignment import AssignmentRead, AssignmentRequest
 from app.schemas.task import TaskRead
 from app.services.assignment_service import request_assignment
 
@@ -18,7 +18,9 @@ def list_projects(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    if current_user.role in {"manager", "admin"}:
+    if current_user.role in {"manager", "admin", "hr", "academic_partnership_admin"}:
+        return task_repo.list_tasks(db, 0, 200, None, None, None)
+    if current_user.role in {"univ_teacher", "univ_supervisor", "univ_admin"}:
         return task_repo.list_tasks(db, 0, 200, None, None, None)
     if current_user.role == "curator":
         return db.query(Task).filter(Task.created_by == current_user.id).all()
@@ -49,10 +51,12 @@ def get_project(
 @router.post("/{project_id}/applications", response_model=AssignmentRead)
 def apply_to_project(
     project_id: int,
+    payload: AssignmentRequest | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles("student")),
 ):
     task = task_repo.get_task(db, project_id)
     if not task:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
-    return request_assignment(db, project_id, current_user.id)
+    nda_accepted = payload.nda_accepted if payload else False
+    return request_assignment(db, task, current_user.id, nda_accepted)

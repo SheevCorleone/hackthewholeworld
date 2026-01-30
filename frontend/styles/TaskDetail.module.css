@@ -70,6 +70,14 @@
   color: var(--muted-600);
 }
 
+.checkboxRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-700);
+}
+
 .formCard {
   margin-top: 20px;
   background: var(--card-0);

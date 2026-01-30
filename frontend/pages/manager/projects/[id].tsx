@@ -12,6 +12,15 @@ type Project = {
   id: number;
   title: string;
   description: string;
+  goal?: string | null;
+  key_tasks?: string | null;
+  novelty?: string | null;
+  skills_required?: string | null;
+  course_alignment?: string | null;
+  diploma_possible?: boolean | null;
+  practice_possible?: boolean | null;
+  course_project_possible?: boolean | null;
+  nda_required?: boolean | null;
   status: string;
   mentor_id?: number | null;
   tags?: string | null;
@@ -48,12 +57,21 @@ type Application = {
   };
 };
 
+type Question = {
+  id: number;
+  body: string;
+  author_id: number;
+  is_private: boolean;
+  meeting_info?: string | null;
+};
+
 export default function ManagerProjectDetailPage() {
   const router = useRouter();
   const { id } = router.query;
   const [project, setProject] = useState<Project | null>(null);
   const [mentors, setMentors] = useState<Mentor[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const loadProject = async () => {
@@ -81,6 +99,7 @@ export default function ManagerProjectDetailPage() {
     loadProject();
     loadApplications();
     apiRequest<Mentor[]>("/manager/mentors").then(setMentors).catch(() => null);
+    apiRequest<Question[]>(`/questions?task_id=${id}`).then(setQuestions).catch(() => null);
   }, [id]);
 
   const handleAssignMentor = async (event: FormEvent<HTMLFormElement>) => {
@@ -120,9 +139,28 @@ export default function ManagerProjectDetailPage() {
             <Card>
               <h2>{project.title}</h2>
               <p>{project.description}</p>
+              {project.goal && <p>Цель: {project.goal}</p>}
+              {project.key_tasks && <p>Ключевые задачи: {project.key_tasks}</p>}
+              {project.novelty && <p>Новизна: {project.novelty}</p>}
+              <div className={styles.toolbar}>
+                <span className={styles.pill}>Навыки: {project.skills_required || "—"}</span>
+                <span className={styles.pill}>Программа: {project.course_alignment || "—"}</span>
+              </div>
               <div className={styles.toolbar}>
                 <span className={styles.pill}>{project.status}</span>
                 <span className={styles.pill}>Mentor: {project.mentor_id ?? "не назначен"}</span>
+              </div>
+              <div className={styles.toolbar}>
+                <span className={styles.pill}>
+                  Диплом: {project.diploma_possible ? "да" : "нет"}
+                </span>
+                <span className={styles.pill}>
+                  Практика: {project.practice_possible ? "да" : "нет"}
+                </span>
+                <span className={styles.pill}>
+                  Курсовой: {project.course_project_possible ? "да" : "нет"}
+                </span>
+                <span className={styles.pill}>NDA: {project.nda_required ? "да" : "нет"}</span>
               </div>
             </Card>
 
@@ -188,6 +226,21 @@ export default function ManagerProjectDetailPage() {
                     ))}
                   </tbody>
                 </table>
+              )}
+            </Card>
+
+            <Card>
+              <h3>Вопросы по проекту</h3>
+              {questions.length === 0 && <p>Вопросов пока нет.</p>}
+              {questions.length > 0 && (
+                <ul className={styles.list}>
+                  {questions.map((question) => (
+                    <li key={question.id}>
+                      <strong>{question.is_private ? "Private" : "Public"}</strong>: {question.body}
+                      {question.meeting_info && <div>Встреча: {question.meeting_info}</div>}
+                    </li>
+                  ))}
+                </ul>
               )}
             </Card>
           </div>

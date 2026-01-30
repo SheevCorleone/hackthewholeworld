@@ -13,7 +13,19 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(String(255))
     full_name: Mapped[str] = mapped_column(String(255))
     role: Mapped[str] = mapped_column(
-        Enum("student", "curator", "mentor", "manager", "admin", name="user_roles"),
+        Enum(
+            "student",
+            "curator",
+            "mentor",
+            "manager",
+            "admin",
+            "univ_teacher",
+            "univ_supervisor",
+            "univ_admin",
+            "hr",
+            "academic_partnership_admin",
+            name="user_roles",
+        ),
         default="student",
         index=True,
     )
@@ -21,6 +33,8 @@ class User(Base):
     faculty: Mapped[str | None] = mapped_column(String(255), nullable=True)
     skills: Mapped[str | None] = mapped_column(String(500), nullable=True)
     course: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    linkedin_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    github_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     last_active_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
@@ -51,4 +65,11 @@ class User(Base):
     comments = relationship(
         "Comment",
         back_populates="author",
+        foreign_keys="Comment.author_id",
+    )
+
+    skills_list = relationship(
+        "UserSkill",
+        back_populates="user",
+        cascade="all, delete-orphan",
     )
