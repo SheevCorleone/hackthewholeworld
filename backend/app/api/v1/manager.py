@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user, require_roles
 from app.db.session import get_db
 from app.models.assignment import Assignment
+from app.models.review import Review
 from app.models.task import Task
 from app.models.user import User
 from app.repositories import assignment_repo, task_repo, user_repo
@@ -221,11 +222,24 @@ def _student_stats(db: Session, student_id: int) -> StudentStats:
         .scalar()
         or 0
     )
+    review_count = (
+        db.query(func.count(Review.id))
+        .join(Review.assignment)
+        .filter(Review.assignment.has(student_id=student_id))
+        .scalar()
+        or 0
+    )
+    average_rating = (
+        db.query(func.avg(Review.rating))
+        .join(Review.assignment)
+        .filter(Review.assignment.has(student_id=student_id))
+        .scalar()
+    )
     return StudentStats(
         applications_total=total,
         applications_approved=approved,
         applications_rejected=rejected,
         projects_completed=completed,
-        reviews_count=0,
-        average_rating=None,
+        reviews_count=review_count,
+        average_rating=float(average_rating) if average_rating is not None else None,
     )

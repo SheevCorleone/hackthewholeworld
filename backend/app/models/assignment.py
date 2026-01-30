@@ -20,6 +20,7 @@ class Assignment(Base):
         default="requested",
         index=True,
     )
+    nda_accepted: Mapped[bool] = mapped_column(default=False)
 
     decision_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     decided_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)

@@ -11,7 +11,8 @@ const navByRole: Record<string, { label: string; href: string }[]> = {
     { label: "Студенты", href: "/manager/students" },
     { label: "Менторы", href: "/manager/mentors" },
     { label: "Кураторы", href: "/manager/curators/new" },
-    { label: "Рецензии", href: "/manager/reviews" }
+    { label: "Рецензии", href: "/manager/reviews" },
+    { label: "HR дашборд", href: "/hr/dashboard" }
   ],
   curator: [
     { label: "Проекты", href: "/curator/projects" }
@@ -19,12 +20,18 @@ const navByRole: Record<string, { label: string; href: string }[]> = {
   student: [
     { label: "Проекты", href: "/student/projects" },
     { label: "Принятые", href: "/student/accepted" },
-    { label: "Рецензии", href: "/student/reviews" }
+    { label: "Рецензии", href: "/student/reviews" },
+    { label: "Портфолио", href: "/student/portfolio" }
   ],
   mentor: [
     { label: "Проекты", href: "/mentor/projects" },
     { label: "Рецензии", href: "/mentor/reviews" }
   ],
+  univ_teacher: [{ label: "Согласования", href: "/univ/approvals" }],
+  univ_supervisor: [{ label: "Согласования", href: "/univ/approvals" }],
+  univ_admin: [{ label: "Согласования", href: "/univ/approvals" }],
+  hr: [{ label: "HR дашборд", href: "/hr/dashboard" }],
+  academic_partnership_admin: [{ label: "Проекты", href: "/manager/projects" }],
   admin: [
     { label: "Дашборд", href: "/manager" },
     { label: "Проекты", href: "/manager/projects" },

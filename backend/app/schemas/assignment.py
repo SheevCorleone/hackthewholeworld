@@ -4,10 +4,16 @@ from pydantic import BaseModel
 
 class AssignmentCreate(BaseModel):
     task_id: int
+    nda_accepted: bool | None = False
+
+
+class AssignmentRequest(BaseModel):
+    nda_accepted: bool | None = False
 
 
 class AssignmentUpdate(BaseModel):
     state: str
+    nda_accepted: bool | None = None
 
 
 class AssignmentRead(BaseModel):
@@ -15,6 +21,7 @@ class AssignmentRead(BaseModel):
     task_id: int
     student_id: int
     state: str
+    nda_accepted: bool
     decision_at: datetime | None = None
     decided_by: int | None = None
     decision_reason: str | None = None
