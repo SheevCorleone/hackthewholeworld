@@ -5,12 +5,13 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.core.config import get_settings
-from app.core.security import create_access_token, create_refresh_token
+from app.core.security import create_access_token, create_refresh_token, get_password_hash, verify_password
 from app.db.session import get_db
-from app.schemas.auth import LoginRequest, TokenPair
+from app.schemas.auth import ChangePasswordRequest, LoginRequest, TokenPair
 from app.models.user import User
 from app.schemas.user import UserCreate, UserRead
 from app.services.auth_service import authenticate_user, register_user
+from app.services.audit_service import log_action
 
 settings = get_settings()
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -50,15 +51,28 @@ def login(payload: LoginRequest, request: Request, db: Session = Depends(get_db)
 
 
 @router.post("/refresh", response_model=TokenPair)
-def refresh(token: str = Body(..., embed=True)):
+def refresh(token: str = Body(..., embed=True), db: Session = Depends(get_db)):
     try:
         payload = jwt.decode(token, settings.secret_key, algorithms=["HS256"])
     except JWTError as exc:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token") from exc
     if payload.get("type") != "refresh":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
-    access = create_access_token(payload["sub"], payload["role"])
-    refresh_token = create_refresh_token(payload["sub"], payload["role"])
+    user = db.get(User, int(payload["sub"]))
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+    if user.status != "active":
+        detail = "Account is pending approval"
+        if user.status == "disabled":
+            detail = "Account is disabled"
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=detail)
+    token_version = payload.get("token_version")
+    if token_version is None:
+        token_version = 0
+    if user.token_version != token_version:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
+    access = create_access_token(payload["sub"], user.role, user.token_version)
+    refresh_token = create_refresh_token(payload["sub"], user.role, user.token_version)
     return TokenPair(access_token=access, refresh_token=refresh_token)
 
 
@@ -70,3 +84,19 @@ def logout():
 @router.get("/me", response_model=UserRead)
 def me(current_user=Depends(get_current_user)):
     return current_user
+
+
+@router.post("/change-password")
+def change_password(
+    payload: ChangePasswordRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if not verify_password(payload.old_password, current_user.password_hash):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid old password")
+    current_user.password_hash = get_password_hash(payload.new_password)
+    current_user.token_version = (current_user.token_version or 0) + 1
+    db.add(current_user)
+    db.commit()
+    log_action(db, actor_id=current_user.id, action="password_changed", entity_type="user", entity_id=current_user.id)
+    return {"message": "Password updated"}
