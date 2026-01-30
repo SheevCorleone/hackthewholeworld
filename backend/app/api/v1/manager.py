@@ -1,13 +1,15 @@
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, require_roles
+from app.api.deps import require_roles
 from app.db.session import get_db
 from app.models.assignment import Assignment
+from app.models.review import Review
 from app.models.task import Task
 from app.models.user import User
-from app.repositories import assignment_repo, task_repo, user_repo
+from app.repositories import assignment_repo, task_mentor_repo, task_repo, user_repo
 from app.schemas.assignment import AssignmentRead
 from app.schemas.manager import (
     ApplicationWithStudent,
@@ -18,8 +20,10 @@ from app.schemas.manager import (
     StudentWithStats,
 )
 from app.schemas.task import TaskCreate, TaskRead, TaskUpdate
+from app.schemas.team import TaskMentorRead
 from app.schemas.user import UserRead
 from app.services.assignment_service import decide_assignment
+from app.services.audit_service import log_action
 from app.services.auth_service import create_user_with_role
 from app.services.task_service import create_task, update_task
 
@@ -36,7 +40,12 @@ def manager_dashboard(
     pending_applications = (
         db.query(func.count(Assignment.id)).filter(Assignment.state == "requested").scalar() or 0
     )
-    students = db.query(func.count(User.id)).filter(User.role == "student").scalar() or 0
+    students = (
+        db.query(func.count(User.id))
+        .filter(User.role == "student", User.status == "active")
+        .scalar()
+        or 0
+    )
     mentors = db.query(func.count(User.id)).filter(User.role == "mentor").scalar() or 0
     return ManagerDashboard(
         total_projects=total_projects,
@@ -91,6 +100,19 @@ def update_project(
     return update_task(db, task, payload)
 
 
+@router.post("/projects/{task_id}/archive", response_model=TaskRead)
+def archive_project(
+    task_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("manager", "admin")),
+):
+    task = task_repo.get_task(db, task_id)
+    if not task:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    task.status = "closed"
+    return update_task(db, task, TaskUpdate(status="closed"))
+
+
 @router.get("/projects/{task_id}/applications", response_model=list[ApplicationWithStudent])
 def list_project_applications(
     task_id: int,
@@ -109,6 +131,7 @@ def list_project_applications(
                 task_id=assignment.task_id,
                 student_id=assignment.student_id,
                 state=assignment.state,
+                team_role=assignment.team_role,
                 decision_at=assignment.decision_at,
                 decided_by=assignment.decided_by,
                 decision_reason=assignment.decision_reason,
@@ -130,7 +153,15 @@ def approve_application(
     assignment = assignment_repo.get_assignment(db, assignment_id)
     if not assignment:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Application not found")
-    return decide_assignment(db, assignment, state="active", decided_by=current_user.id)
+    updated = decide_assignment(db, assignment, state="active", decided_by=current_user.id)
+    log_action(
+        db,
+        actor_id=current_user.id,
+        action="assignment_approved",
+        entity_type="assignment",
+        entity_id=updated.id,
+    )
+    return updated
 
 
 @router.post("/applications/{assignment_id}/reject", response_model=AssignmentRead)
@@ -143,7 +174,31 @@ def reject_application(
     assignment = assignment_repo.get_assignment(db, assignment_id)
     if not assignment:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Application not found")
-    return decide_assignment(db, assignment, state="canceled", decided_by=current_user.id, reason=reason)
+    updated = decide_assignment(db, assignment, state="canceled", decided_by=current_user.id, reason=reason)
+    log_action(
+        db,
+        actor_id=current_user.id,
+        action="assignment_rejected",
+        entity_type="assignment",
+        entity_id=updated.id,
+    )
+    return updated
+
+
+@router.patch("/applications/{assignment_id}/role", response_model=AssignmentRead)
+def update_application_role(
+    assignment_id: int,
+    role: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles("manager", "admin")),
+):
+    assignment = assignment_repo.get_assignment(db, assignment_id)
+    if not assignment:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Application not found")
+    assignment.team_role = role
+    assignment.decided_by = current_user.id
+    assignment.updated_at = datetime.utcnow()
+    return assignment_repo.update_assignment(db, assignment)
 
 
 @router.post("/mentors", response_model=UserRead)
@@ -176,6 +231,65 @@ def list_mentors(
     return user_repo.list_users_by_role(db, "mentor", 0, 200)
 
 
+@router.get("/projects/{task_id}/mentors", response_model=list[TaskMentorRead])
+def list_task_mentors(
+    task_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("manager", "admin")),
+):
+    task = task_repo.get_task(db, task_id)
+    if not task:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    links = task_mentor_repo.list_task_mentors(db, task_id)
+    result = []
+    for link in links:
+        result.append(
+            TaskMentorRead(
+                id=link.id,
+                mentor_id=link.mentor_id,
+                full_name=link.mentor.full_name,
+                email=link.mentor.email,
+            )
+        )
+    return result
+
+
+@router.post("/projects/{task_id}/mentors", response_model=TaskMentorRead)
+def add_task_mentor(
+    task_id: int,
+    mentor_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("manager", "admin")),
+):
+    task = task_repo.get_task(db, task_id)
+    if not task:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    mentor = db.get(User, mentor_id)
+    if not mentor or mentor.role != "mentor":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Mentor not found")
+    link = task_mentor_repo.add_task_mentor(db, task_id, mentor_id)
+    return TaskMentorRead(
+        id=link.id,
+        mentor_id=link.mentor_id,
+        full_name=link.mentor.full_name,
+        email=link.mentor.email,
+    )
+
+
+@router.delete("/projects/{task_id}/mentors/{mentor_id}")
+def remove_task_mentor(
+    task_id: int,
+    mentor_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("manager", "admin")),
+):
+    task = task_repo.get_task(db, task_id)
+    if not task:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    task_mentor_repo.remove_task_mentor(db, task_id, mentor_id)
+    return {"message": "Mentor removed"}
+
+
 @router.get("/students", response_model=list[StudentWithStats])
 def list_students(
     db: Session = Depends(get_db),
@@ -187,6 +301,60 @@ def list_students(
         summary = StudentSummary.model_validate(student)
         response.append(StudentWithStats(**summary.model_dump(), stats=_student_stats(db, student.id)))
     return response
+
+
+@router.get("/students/pending", response_model=list[StudentSummary])
+def list_pending_students(
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("manager", "admin")),
+):
+    return db.query(User).filter(User.role == "student", User.status == "pending").all()
+
+
+@router.post("/students/{student_id}/approve", response_model=UserRead)
+def approve_student(
+    student_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles("manager", "admin")),
+):
+    student = db.get(User, student_id)
+    if not student or student.role != "student":
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student not found")
+    student.status = "active"
+    db.add(student)
+    db.commit()
+    db.refresh(student)
+    log_action(
+        db,
+        actor_id=current_user.id,
+        action="student_approved",
+        entity_type="user",
+        entity_id=student_id,
+    )
+    return student
+
+
+@router.post("/students/{student_id}/reject", response_model=UserRead)
+def reject_student(
+    student_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles("manager", "admin")),
+):
+    student = db.get(User, student_id)
+    if not student or student.role != "student":
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student not found")
+    student.status = "disabled"
+    db.add(student)
+    db.commit()
+    db.refresh(student)
+    log_action(
+        db,
+        actor_id=current_user.id,
+        action="student_rejected",
+        entity_type="user",
+        entity_id=student_id,
+    )
+    return student
 
 
 @router.get("/students/{student_id}/stats", response_model=StudentStats)
@@ -221,11 +389,24 @@ def _student_stats(db: Session, student_id: int) -> StudentStats:
         .scalar()
         or 0
     )
+    review_count = (
+        db.query(func.count(Review.id))
+        .join(Review.assignment)
+        .filter(Review.assignment.has(student_id=student_id))
+        .scalar()
+        or 0
+    )
+    average_rating = (
+        db.query(func.avg(Review.rating))
+        .join(Review.assignment)
+        .filter(Review.assignment.has(student_id=student_id))
+        .scalar()
+    )
     return StudentStats(
         applications_total=total,
         applications_approved=approved,
         applications_rejected=rejected,
         projects_completed=completed,
-        reviews_count=0,
-        average_rating=None,
+        reviews_count=review_count,
+        average_rating=float(average_rating) if average_rating is not None else None,
     )

@@ -5,7 +5,18 @@ import styles from "../styles/Guard.module.css";
 
 type Props = {
   children: ReactNode;
-  roles?: Array<"manager" | "admin" | "curator" | "student" | "mentor">;
+  roles?: Array<
+    | "manager"
+    | "admin"
+    | "curator"
+    | "student"
+    | "mentor"
+    | "univ_teacher"
+    | "univ_supervisor"
+    | "univ_admin"
+    | "hr"
+    | "academic_partnership_admin"
+  >;
 };
 
 export default function RouteGuard({ children, roles }: Props) {

@@ -1,3 +1,31 @@
-from app.api.v1 import assignments, auth, comments, tasks, users
+from app.api.v1 import (
+    approvals,
+    assignments,
+    auth,
+    comments,
+    hr,
+    manager,
+    portfolio,
+    projects,
+    questions,
+    reviews,
+    tasks,
+    univ,
+    users,
+)
 
-__all__ = ["assignments", "auth", "comments", "tasks", "users"]
+__all__ = [
+    "approvals",
+    "assignments",
+    "auth",
+    "comments",
+    "hr",
+    "manager",
+    "portfolio",
+    "projects",
+    "questions",
+    "reviews",
+    "tasks",
+    "univ",
+    "users",
+]

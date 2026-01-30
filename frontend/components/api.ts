@@ -10,7 +10,12 @@ function getApiBaseUrl(): string {
 export const API_URL = getApiBaseUrl();
 
 function getHealthUrl(): string {
-  return "http://localhost:8000/health";
+  try {
+    const base = new URL(API_URL);
+    return `${base.origin}/health`;
+  } catch (error) {
+    return "http://localhost:8000/health";
+  }
 }
 
 export async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
