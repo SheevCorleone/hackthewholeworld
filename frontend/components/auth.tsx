@@ -1,4 +1,5 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/router";
 import { apiRequest } from "./api";
 
 export type User = {
@@ -28,25 +29,35 @@ export type User = {
 
 type AuthContextValue = {
   user: User | null;
+  accessToken: string | null;
+  role: User["role"] | null;
   loading: boolean;
   isAuthenticated: boolean;
   refreshUser: () => Promise<void>;
+  login: (accessToken: string, refreshToken: string) => Promise<User>;
   logout: () => void;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem("access_token");
+  });
   const [loading, setLoading] = useState(true);
 
   const refreshUser = useCallback(async () => {
     const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
     if (!token) {
       setUser(null);
+      setAccessToken(null);
       setLoading(false);
       return;
     }
+    setAccessToken(token);
     try {
       const data = await apiRequest<User>("/auth/me");
       setUser(data);
@@ -63,23 +74,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refreshUser();
   }, [refreshUser]);
 
+  const login = useCallback(async (nextAccessToken: string, nextRefreshToken: string) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("access_token", nextAccessToken);
+      localStorage.setItem("refresh_token", nextRefreshToken);
+    }
+    setAccessToken(nextAccessToken);
+    setLoading(true);
+    try {
+      const profile = await apiRequest<User>("/auth/me");
+      setUser(profile);
+      return profile;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const logout = useCallback(() => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
-      window.location.href = "/login";
     }
-  }, []);
+    setAccessToken(null);
+    setUser(null);
+    setLoading(false);
+    router.replace("/login");
+  }, [router]);
 
   const value = useMemo(
     () => ({
       user,
+      accessToken,
+      role: user?.role ?? null,
       loading,
       isAuthenticated: Boolean(user),
       refreshUser,
+      login,
       logout
     }),
-    [user, loading, refreshUser, logout]
+    [user, accessToken, loading, refreshUser, login, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
