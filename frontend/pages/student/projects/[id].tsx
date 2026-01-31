@@ -137,58 +137,79 @@ export default function StudentProjectDetailPage() {
         {error && <p className={styles.error}>{error}</p>}
         {project && (
           <div className={styles.wrapper}>
-            <Card>
-              <div className={styles.header}>
-                <h1 className={styles.title}>{project.title}</h1>
-                <span className={styles.status}>{project.status}</span>
+            <div className={styles.detailGrid}>
+              <Card className={styles.detailCard}>
+                <div className={styles.header}>
+                  <h1 className={styles.title}>{project.title}</h1>
+                  <span className={styles.status}>{project.status}</span>
+                </div>
+                <div className={styles.meta}>
+                  {project.is_archived && (
+                    <span className={`${styles.metaPill} ${styles.badgeArchived}`}>Архив</span>
+                  )}
+                  {project.tags && <span className={styles.tagPill}>{project.tags}</span>}
+                  {project.skills_required && <span className={styles.metaPill}>Навыки: {project.skills_required}</span>}
+                  {project.course_alignment && (
+                    <span className={styles.metaPill}>Программа: {project.course_alignment}</span>
+                  )}
+                </div>
+                <div className={styles.section}>
+                  <h3 className={styles.sectionTitle}>Описание</h3>
+                  <p className={styles.sectionBody}>{project.description}</p>
+                </div>
+                <div className={styles.section}>
+                  <h3 className={styles.sectionTitle}>Цели</h3>
+                  <p className={styles.sectionBody}>{project.goal || "—"}</p>
+                </div>
+                <div className={styles.section}>
+                  <h3 className={styles.sectionTitle}>Задачи</h3>
+                  <p className={styles.sectionBody}>{project.key_tasks || "—"}</p>
+                </div>
+                <div className={styles.meta}>
+                  <span className={styles.metaPill}>
+                    Диплом: {project.diploma_possible ? "да" : "нет"}
+                  </span>
+                  <span className={styles.metaPill}>
+                    Практика: {project.practice_possible ? "да" : "нет"}
+                  </span>
+                  <span className={styles.metaPill}>
+                    Курсовой: {project.course_project_possible ? "да" : "нет"}
+                  </span>
+                  <span className={styles.metaPill}>
+                    NDA: {project.nda_required ? "требуется" : "нет"}
+                  </span>
+                </div>
+                {project.nda_required && (
+                  <label className={styles.checkboxRow}>
+                    <input
+                      type="checkbox"
+                      checked={ndaAccepted}
+                      onChange={(event) => setNdaAccepted(event.target.checked)}
+                    />
+                    Я согласен с NDA
+                  </label>
+                )}
+                <div className={styles.meta}>
+                  <span className={styles.metaPill}>
+                    Статус заявки: {statusLabel(assignment?.state) || "нет заявки"}
+                  </span>
+                </div>
+                <div className={styles.ctaRow}>
+                  <Button onClick={apply} disabled={Boolean(assignment)}>
+                    {assignment ? "Заявка отправлена" : "Подать заявку"}
+                  </Button>
+                </div>
+                {message && <p className={styles.metaPill}>{message}</p>}
+              </Card>
+              <div className={styles.infoCard}>
+                <p className={styles.infoTitle}>Куратор</p>
+                <p className={styles.infoValue}>{project.curator_full_name || "—"}</p>
+                <p className={styles.infoTitle}>Ментор(ы)</p>
+                <p className={styles.infoValue}>{mentorLabel}</p>
+                <p className={styles.infoTitle}>Теги/цели</p>
+                <p className={styles.infoValue}>{project.tags || project.goal || "—"}</p>
               </div>
-              <p className={styles.description}>{project.description}</p>
-              <div className={styles.meta}>
-                <span className={styles.metaPill}>Куратор: {project.curator_full_name || "—"}</span>
-                <span className={styles.metaPill}>Ментор: {mentorLabel}</span>
-              </div>
-              {project.goal && <p className={styles.description}>Цель: {project.goal}</p>}
-              {project.key_tasks && <p className={styles.description}>Ключевые задачи: {project.key_tasks}</p>}
-              {project.novelty && <p className={styles.description}>Новизна: {project.novelty}</p>}
-              <div className={styles.meta}>
-                <span className={styles.metaPill}>Навыки: {project.skills_required || "—"}</span>
-                <span className={styles.metaPill}>Программа: {project.course_alignment || "—"}</span>
-              </div>
-              <div className={styles.meta}>
-                <span className={styles.metaPill}>
-                  Диплом: {project.diploma_possible ? "да" : "нет"}
-                </span>
-                <span className={styles.metaPill}>
-                  Практика: {project.practice_possible ? "да" : "нет"}
-                </span>
-                <span className={styles.metaPill}>
-                  Курсовой: {project.course_project_possible ? "да" : "нет"}
-                </span>
-                <span className={styles.metaPill}>
-                  NDA: {project.nda_required ? "требуется" : "нет"}
-                </span>
-              </div>
-              {project.tags && <p className={styles.metaPill}>Tags: {project.tags}</p>}
-              {project.nda_required && (
-                <label className={styles.checkboxRow}>
-                  <input
-                    type="checkbox"
-                    checked={ndaAccepted}
-                    onChange={(event) => setNdaAccepted(event.target.checked)}
-                  />
-                  Я согласен с NDA
-                </label>
-              )}
-              <div className={styles.meta}>
-                <span className={styles.metaPill}>
-                  Статус заявки: {statusLabel(assignment?.state) || "нет заявки"}
-                </span>
-              </div>
-              <Button onClick={apply} disabled={Boolean(assignment)}>
-                {assignment ? "Заявка отправлена" : "Подать заявку"}
-              </Button>
-              {message && <p>{message}</p>}
-            </Card>
+            </div>
             <Card>
               <h2>Команда проекта</h2>
               {team.length === 0 && <p>Команда пока не сформирована.</p>}

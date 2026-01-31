@@ -4,17 +4,17 @@ from pydantic import BaseModel, Field
 
 class TaskBase(BaseModel):
     title: str = Field(min_length=3, max_length=255)
-    description: str = Field(min_length=10)
-    goal: str | None = None
-    key_tasks: str | None = None
-    novelty: str | None = None
-    skills_required: str | None = None
-    course_alignment: str | None = None
+    description: str = Field(min_length=10, max_length=4000)
+    goal: str | None = Field(default=None, max_length=2000)
+    key_tasks: str | None = Field(default=None, max_length=2000)
+    novelty: str | None = Field(default=None, max_length=2000)
+    skills_required: str | None = Field(default=None, max_length=500)
+    course_alignment: str | None = Field(default=None, max_length=255)
     diploma_possible: bool | None = None
     practice_possible: bool | None = None
     course_project_possible: bool | None = None
     nda_required: bool | None = None
-    tags: str | None = None
+    tags: str | None = Field(default=None, max_length=255)
     status: str | None = None
     is_archived: bool | None = None
     curator_id: int | None = None
@@ -33,18 +33,18 @@ class TaskCreate(TaskBase):
 
 
 class TaskUpdate(BaseModel):
-    title: str | None = None
-    description: str | None = None
-    goal: str | None = None
-    key_tasks: str | None = None
-    novelty: str | None = None
-    skills_required: str | None = None
-    course_alignment: str | None = None
+    title: str | None = Field(default=None, min_length=3, max_length=255)
+    description: str | None = Field(default=None, min_length=10, max_length=4000)
+    goal: str | None = Field(default=None, max_length=2000)
+    key_tasks: str | None = Field(default=None, max_length=2000)
+    novelty: str | None = Field(default=None, max_length=2000)
+    skills_required: str | None = Field(default=None, max_length=500)
+    course_alignment: str | None = Field(default=None, max_length=255)
     diploma_possible: bool | None = None
     practice_possible: bool | None = None
     course_project_possible: bool | None = None
     nda_required: bool | None = None
-    tags: str | None = None
+    tags: str | None = Field(default=None, max_length=255)
     status: str | None = None
     is_archived: bool | None = None
     curator_id: int | None = None

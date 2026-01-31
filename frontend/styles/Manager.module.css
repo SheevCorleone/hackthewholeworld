@@ -144,6 +144,70 @@
   letter-spacing: 0.04em;
 }
 
+.projectCard {
+  display: grid;
+  gap: 12px;
+}
+
+.projectTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.projectDescription {
+  margin: 0;
+  color: var(--text-700);
+  font-size: 14px;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pillRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.actionRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.emptyState {
+  margin-top: 24px;
+  padding: 24px;
+  border-radius: var(--radius-16);
+  border: 1px dashed var(--border-200);
+  color: var(--muted-600);
+  text-align: center;
+}
+
+.skeletonCard {
+  display: grid;
+  gap: 12px;
+}
+
+.skeletonTitle {
+  height: 18px;
+  width: 60%;
+}
+
+.skeletonLine {
+  height: 12px;
+  width: 100%;
+}
+
+.skeletonLineShort {
+  height: 12px;
+  width: 70%;
+}
+
 .stack {
   display: grid;
   gap: 12px;
