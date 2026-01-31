@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import Layout from "../../components/Layout";
 import RouteGuard from "../../components/RouteGuard";
 import Card from "../../components/Card";
@@ -8,6 +9,7 @@ import styles from "../../styles/MyTasks.module.css";
 type Assignment = {
   id: number;
   task_id: number;
+  task_title?: string | null;
   state: string;
 };
 
@@ -41,7 +43,11 @@ export default function StudentAcceptedPage() {
           {assignments.map((assignment) => (
             <Card key={assignment.id}>
               <div className={styles.row}>
-                <strong>Проект #{assignment.task_id}</strong>
+                <strong>
+                  <Link href={`/student/projects/${assignment.task_id}`} className={styles.projectLink}>
+                    {assignment.task_title || `Проект #${assignment.task_id}`}
+                  </Link>
+                </strong>
                 <span className={styles.state}>{statusLabel(assignment.state)}</span>
               </div>
             </Card>
@@ -55,7 +61,11 @@ export default function StudentAcceptedPage() {
           {accepted.map((assignment) => (
             <Card key={assignment.id}>
               <div className={styles.row}>
-                <strong>Проект #{assignment.task_id}</strong>
+                <strong>
+                  <Link href={`/student/projects/${assignment.task_id}`} className={styles.projectLink}>
+                    {assignment.task_title || `Проект #${assignment.task_id}`}
+                  </Link>
+                </strong>
                 <span className={styles.state}>{statusLabel(assignment.state)}</span>
               </div>
             </Card>

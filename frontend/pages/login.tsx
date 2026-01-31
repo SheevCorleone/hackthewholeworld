@@ -1,6 +1,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/router";
 import Layout from "../components/Layout";
+import { useAuth } from "../components/auth";
 import { apiRequest } from "../components/api";
 import Input from "../components/Input";
 import Button from "../components/Button";
@@ -8,6 +9,7 @@ import styles from "../styles/Auth.module.css";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -24,9 +26,7 @@ export default function LoginPage() {
         method: "POST",
         body: JSON.stringify({ email, password })
       });
-      localStorage.setItem("access_token", data.access_token);
-      localStorage.setItem("refresh_token", data.refresh_token);
-      const me = await apiRequest<{ role: string }>("/auth/me");
+      const me = await login(data.access_token, data.refresh_token);
       const roleRedirects: Record<string, string> = {
         manager: "/manager",
         admin: "/manager",
@@ -39,7 +39,7 @@ export default function LoginPage() {
         hr: "/hr/dashboard",
         academic_partnership_admin: "/manager/projects"
       };
-      router.push(roleRedirects[me.role] || "/login");
+      router.replace(roleRedirects[me.role] || "/login");
     } catch (err) {
       const message = (err as Error).message;
       const lower = message.toLowerCase();

@@ -20,8 +20,8 @@ def seed():
         }
         created = {}
         for role, (email, name, role_name) in users.items():
-            existing = user_repo.get_by_email(db, email)
-            if existing:
+            existing = user_repo.get_by_email(db, email, include_deleted=True)
+            if existing and not existing.is_deleted:
                 created[role] = existing
                 continue
             created[role] = create_user_with_role(

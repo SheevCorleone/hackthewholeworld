@@ -21,7 +21,8 @@ const navByRole: Record<string, { label: string; href: string }[]> = {
     { label: "Проекты", href: "/student/projects" },
     { label: "Принятые", href: "/student/accepted" },
     { label: "Рецензии", href: "/student/reviews" },
-    { label: "Портфолио", href: "/student/portfolio" }
+    { label: "Портфолио", href: "/student/portfolio" },
+    { label: "Профиль", href: "/profile" }
   ],
   mentor: [
     { label: "Проекты", href: "/mentor/projects" },

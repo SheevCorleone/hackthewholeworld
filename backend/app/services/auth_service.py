@@ -9,8 +9,22 @@ from app.services.audit_service import log_action
 
 
 def register_user(db: Session, email: str, full_name: str, password: str) -> User:
-    if user_repo.get_by_email(db, email):
+    existing = user_repo.get_by_email(db, email, include_deleted=True)
+    if existing and not existing.is_deleted:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+    if existing and existing.is_deleted:
+        existing.email = email
+        existing.full_name = full_name
+        existing.password_hash = get_password_hash(password)
+        existing.role = "student"
+        existing.status = "pending"
+        existing.is_deleted = False
+        existing.token_version = (existing.token_version or 0) + 1
+        db.add(existing)
+        db.commit()
+        db.refresh(existing)
+        log_action(db, actor_id=existing.id, action="user_reactivated", entity_type="user", entity_id=existing.id)
+        return existing
     user = User(
         email=email,
         full_name=full_name,
@@ -35,8 +49,25 @@ def create_user_with_role(
     course: str | None = None,
     status: str | None = "active",
 ) -> User:
-    if user_repo.get_by_email(db, email):
+    existing = user_repo.get_by_email(db, email, include_deleted=True)
+    if existing and not existing.is_deleted:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+    if existing and existing.is_deleted:
+        existing.email = email
+        existing.full_name = full_name
+        existing.password_hash = get_password_hash(password)
+        existing.role = role
+        existing.status = status or "active"
+        existing.faculty = faculty
+        existing.skills = skills
+        existing.course = course
+        existing.is_deleted = False
+        existing.token_version = (existing.token_version or 0) + 1
+        db.add(existing)
+        db.commit()
+        db.refresh(existing)
+        log_action(db, actor_id=existing.id, action="user_reactivated", entity_type="user", entity_id=existing.id)
+        return existing
     user = User(
         email=email,
         full_name=full_name,
@@ -53,9 +84,11 @@ def create_user_with_role(
 
 
 def authenticate_user(db: Session, email: str, password: str) -> tuple[str, str]:
-    user = user_repo.get_by_email(db, email)
+    user = user_repo.get_by_email(db, email, include_deleted=True)
     if not user or not verify_password(password, user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+    if user.is_deleted:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account is deleted")
     if user.status != "active":
         if user.status == "disabled":
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account is disabled")

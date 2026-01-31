@@ -46,3 +46,7 @@ class Assignment(Base):
         back_populates="decided_assignments",
         foreign_keys=[decided_by],
     )
+
+    @property
+    def task_title(self) -> str | None:
+        return self.task.title if self.task else None

@@ -24,6 +24,8 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     user = db.get(User, int(user_id))
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+    if user.is_deleted:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account is deleted")
     if user.status != "active":
         detail = "Account is pending approval"
         if user.status == "disabled":

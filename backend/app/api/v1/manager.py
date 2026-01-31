@@ -239,7 +239,11 @@ def list_mentors(
     db: Session = Depends(get_db),
     _: User = Depends(require_roles("manager", "admin")),
 ):
-    return db.query(User).filter(User.role == "mentor", User.status == "active").all()
+    return (
+        db.query(User)
+        .filter(User.role == "mentor", User.status == "active", User.is_deleted.is_(False))
+        .all()
+    )
 
 
 @router.get("/curators", response_model=list[UserRead])
@@ -247,7 +251,11 @@ def list_curators(
     db: Session = Depends(get_db),
     _: User = Depends(require_roles("manager", "admin")),
 ):
-    return db.query(User).filter(User.role == "curator", User.status == "active").all()
+    return (
+        db.query(User)
+        .filter(User.role == "curator", User.status == "active", User.is_deleted.is_(False))
+        .all()
+    )
 
 
 @router.get("/projects/{task_id}/mentors", response_model=list[TaskMentorRead])
@@ -316,9 +324,10 @@ def delete_mentor(
     _: User = Depends(require_roles("manager", "admin")),
 ):
     mentor = db.get(User, mentor_id)
-    if not mentor or mentor.role != "mentor":
+    if not mentor or mentor.role != "mentor" or mentor.is_deleted:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Mentor not found")
     mentor.status = "disabled"
+    mentor.is_deleted = True
     mentor.token_version = (mentor.token_version or 0) + 1
     db.add(mentor)
     db.commit()
@@ -333,9 +342,10 @@ def delete_curator(
     _: User = Depends(require_roles("manager", "admin")),
 ):
     curator = db.get(User, curator_id)
-    if not curator or curator.role != "curator":
+    if not curator or curator.role != "curator" or curator.is_deleted:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Curator not found")
     curator.status = "disabled"
+    curator.is_deleted = True
     curator.token_version = (curator.token_version or 0) + 1
     db.add(curator)
     db.commit()

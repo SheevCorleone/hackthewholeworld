@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.models.assignment import Assignment
 
@@ -25,6 +25,7 @@ def find_assignment(db: Session, task_id: int, student_id: int) -> Assignment | 
 def list_assignments_for_student(db: Session, student_id: int, skip: int, limit: int):
     return (
         db.query(Assignment)
+        .options(joinedload(Assignment.task))
         .filter(Assignment.student_id == student_id)
         .offset(skip)
         .limit(limit)

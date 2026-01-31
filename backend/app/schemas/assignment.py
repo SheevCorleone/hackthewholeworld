@@ -20,6 +20,7 @@ class AssignmentUpdate(BaseModel):
 class AssignmentRead(BaseModel):
     id: int
     task_id: int
+    task_title: str | None = None
     student_id: int
     state: str
     nda_accepted: bool
