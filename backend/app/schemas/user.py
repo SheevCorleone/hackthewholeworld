@@ -7,6 +7,7 @@ class UserBase(BaseModel):
     full_name: str = Field(min_length=2, max_length=255)
     faculty: str | None = None
     skills: str | None = None
+    about: str | None = None
     course: str | None = None
     avatar_url: str | None = None
     linkedin_url: str | None = None
@@ -41,6 +42,7 @@ class UserProfileRead(BaseModel):
     faculty: str | None = None
     course: str | None = None
     skills: str | None = None
+    about: str | None = None
     created_at: datetime
     last_active_at: datetime | None = None
 
@@ -60,3 +62,4 @@ class UserProfileUpdate(BaseModel):
     faculty: str | None = Field(default=None, max_length=255)
     course: str | None = Field(default=None, max_length=255)
     skills: str | None = Field(default=None, max_length=500)
+    about: str | None = Field(default=None, max_length=2000)

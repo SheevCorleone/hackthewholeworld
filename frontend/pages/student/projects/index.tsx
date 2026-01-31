@@ -19,13 +19,22 @@ export default function StudentProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [page, setPage] = useState(0);
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    apiRequest<Project[]>(`/projects?skip=${page * 12}&limit=12&query=${query}`)
+    const handler = window.setTimeout(() => {
+      setDebouncedQuery(query.trim());
+      setPage(0);
+    }, 300);
+    return () => window.clearTimeout(handler);
+  }, [query]);
+
+  useEffect(() => {
+    apiRequest<Project[]>(`/projects?skip=${page * 12}&limit=12&search=${encodeURIComponent(debouncedQuery)}`)
       .then(setProjects)
       .catch((err) => setError(err.message));
-  }, [page, query]);
+  }, [page, debouncedQuery]);
 
   return (
     <RouteGuard roles={["student"]}>
@@ -45,7 +54,7 @@ export default function StudentProjectsPage() {
         <div className={styles.list}>
           {projects.map((project) => (
             <Link key={project.id} href={`/student/projects/${project.id}`}>
-              <Card>
+              <Card className={styles.card}>
                 <div className={styles.cardHeader}>
                   <h2 className={styles.cardTitle}>{project.title}</h2>
                   <span className={styles.status}>{project.status}</span>

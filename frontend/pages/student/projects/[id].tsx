@@ -23,6 +23,10 @@ type Project = {
   nda_required?: boolean | null;
   status: string;
   tags?: string | null;
+  is_archived?: boolean;
+  curator_full_name?: string | null;
+  mentor_full_name?: string | null;
+  mentor_names?: string[] | null;
 };
 
 type Question = {
@@ -42,6 +46,12 @@ type TeamMember = {
   github_url?: string | null;
 };
 
+type Assignment = {
+  id: number;
+  task_id: number;
+  state: string;
+};
+
 export default function StudentProjectDetailPage() {
   const router = useRouter();
   const { id } = router.query;
@@ -51,6 +61,7 @@ export default function StudentProjectDetailPage() {
   const [ndaAccepted, setNdaAccepted] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [team, setTeam] = useState<TeamMember[]>([]);
+  const [assignment, setAssignment] = useState<Assignment | null>(null);
   const [questionBody, setQuestionBody] = useState("");
   const [questionPrivate, setQuestionPrivate] = useState(false);
   const [recipientId, setRecipientId] = useState("");
@@ -63,7 +74,25 @@ export default function StudentProjectDetailPage() {
       .catch((err) => setError(err.message));
     apiRequest<Question[]>(`/questions?task_id=${id}`).then(setQuestions).catch(() => null);
     apiRequest<TeamMember[]>(`/projects/${id}/team`).then(setTeam).catch(() => null);
+    apiRequest<Assignment[]>("/assignments/me")
+      .then((data) => {
+        const found = data.find((item) => item.task_id === Number(id));
+        setAssignment(found || null);
+      })
+      .catch(() => null);
   }, [id]);
+
+  const statusLabel = (state?: string | null) => {
+    if (!state) return null;
+    if (state === "requested") return "pending";
+    if (state === "active" || state === "done") return "approved";
+    if (state === "canceled") return "rejected";
+    return state;
+  };
+
+  const mentorLabel = project?.mentor_names?.length
+    ? project.mentor_names.join(", ")
+    : project?.mentor_full_name || "—";
 
   const apply = async () => {
     if (!id) return;
@@ -74,6 +103,7 @@ export default function StudentProjectDetailPage() {
         body: JSON.stringify({ nda_accepted: ndaAccepted })
       });
       setMessage("Заявка отправлена. Ожидайте решения менеджера.");
+      setAssignment({ id: Date.now(), task_id: Number(id), state: "requested" });
     } catch (err) {
       setError((err as Error).message);
     }
@@ -113,6 +143,10 @@ export default function StudentProjectDetailPage() {
                 <span className={styles.status}>{project.status}</span>
               </div>
               <p className={styles.description}>{project.description}</p>
+              <div className={styles.meta}>
+                <span className={styles.metaPill}>Куратор: {project.curator_full_name || "—"}</span>
+                <span className={styles.metaPill}>Ментор: {mentorLabel}</span>
+              </div>
               {project.goal && <p className={styles.description}>Цель: {project.goal}</p>}
               {project.key_tasks && <p className={styles.description}>Ключевые задачи: {project.key_tasks}</p>}
               {project.novelty && <p className={styles.description}>Новизна: {project.novelty}</p>}
@@ -145,7 +179,14 @@ export default function StudentProjectDetailPage() {
                   Я согласен с NDA
                 </label>
               )}
-              <Button onClick={apply}>Подать заявку</Button>
+              <div className={styles.meta}>
+                <span className={styles.metaPill}>
+                  Статус заявки: {statusLabel(assignment?.state) || "нет заявки"}
+                </span>
+              </div>
+              <Button onClick={apply} disabled={Boolean(assignment)}>
+                {assignment ? "Заявка отправлена" : "Подать заявку"}
+              </Button>
               {message && <p>{message}</p>}
             </Card>
             <Card>

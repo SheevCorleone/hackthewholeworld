@@ -6,7 +6,10 @@ from app.repositories import task_repo
 from app.services.audit_service import log_action
 
 
-def create_task(db: Session, payload, created_by: int) -> Task:
+def create_task(db: Session, payload, created_by: int, creator_role: str | None = None) -> Task:
+    curator_id = payload.curator_id
+    if curator_id is None and creator_role == "curator":
+        curator_id = created_by
     task = Task(
         title=payload.title,
         description=payload.description,
@@ -21,7 +24,9 @@ def create_task(db: Session, payload, created_by: int) -> Task:
         nda_required=bool(payload.nda_required),
         tags=payload.tags,
         status=payload.status or "open",
+        is_archived=bool(payload.is_archived) if payload.is_archived is not None else False,
         created_by=created_by,
+        curator_id=curator_id,
         mentor_id=payload.mentor_id,
         deadline=payload.deadline,
         visibility=payload.visibility or "public",
@@ -59,6 +64,8 @@ def update_task(db: Session, task: Task, payload) -> Task:
     task.nda_required = payload.nda_required if payload.nda_required is not None else task.nda_required
     task.tags = payload.tags or task.tags
     task.status = payload.status or task.status
+    task.is_archived = payload.is_archived if payload.is_archived is not None else task.is_archived
+    task.curator_id = payload.curator_id if payload.curator_id is not None else task.curator_id
     task.mentor_id = payload.mentor_id if payload.mentor_id is not None else task.mentor_id
     task.deadline = payload.deadline if payload.deadline is not None else task.deadline
     task.visibility = payload.visibility or task.visibility

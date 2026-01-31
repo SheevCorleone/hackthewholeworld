@@ -11,6 +11,18 @@ export default function ManagerNewCuratorPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [passwordValue, setPasswordValue] = useState("");
+
+  const generatePassword = () => {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%";
+    const next = Array.from({ length: 12 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+    setPasswordValue(next);
+  };
+
+  const copyPassword = async () => {
+    if (!passwordValue) return;
+    await navigator.clipboard.writeText(passwordValue);
+  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -24,13 +36,13 @@ export default function ManagerNewCuratorPage() {
           role: "curator",
           email: form.get("email"),
           full_name: form.get("full_name"),
-          password: form.get("password"),
+          password: form.get("password") || passwordValue,
           faculty: form.get("faculty"),
           skills: form.get("skills"),
           course: form.get("course")
         })
       });
-      router.push("/manager");
+      router.push("/manager/curators");
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -45,7 +57,24 @@ export default function ManagerNewCuratorPage() {
         <form onSubmit={handleSubmit} className={styles.formCard}>
           <Input name="full_name" label="ФИО" required />
           <Input name="email" type="email" label="Email" required />
-          <Input name="password" type="password" label="Пароль" required />
+          <div className={styles.gridTwo}>
+            <Input
+              name="password"
+              type="text"
+              label="Пароль"
+              required
+              value={passwordValue}
+              onChange={(event) => setPasswordValue(event.target.value)}
+            />
+            <div className={styles.toolbar}>
+              <Button type="button" variant="secondary" onClick={generatePassword}>
+                Сгенерировать
+              </Button>
+              <Button type="button" variant="ghost" onClick={copyPassword} disabled={!passwordValue}>
+                Скопировать
+              </Button>
+            </div>
+          </div>
           <div className={styles.gridTwo}>
             <Input name="faculty" label="Факультет" />
             <Input name="course" label="Курс" />

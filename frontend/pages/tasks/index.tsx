@@ -57,7 +57,7 @@ export default function TasksPage() {
       <div className={styles.list}>
         {tasks.map((task) => (
           <Link key={task.id} href={`/tasks/${task.id}`}>
-            <Card>
+            <Card className={styles.card}>
               <div className={styles.cardHeader}>
                 <h2 className={styles.cardTitle}>{task.title}</h2>
                 <span className={styles.status}>{task.status}</span>

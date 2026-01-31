@@ -4,12 +4,14 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user, require_roles
 from app.db.session import get_db
 from app.models.task import Task
+from app.models.task_mentor import TaskMentor
 from app.models.user import User
 from app.repositories import assignment_repo, task_repo
 from app.schemas.assignment import AssignmentRead, AssignmentRequest
-from app.schemas.task import TaskRead
+from app.schemas.task import TaskRead, TaskUpdate
 from app.schemas.team import TeamMemberRead
 from app.services.assignment_service import request_assignment
+from app.services.task_service import update_task
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 
@@ -34,37 +36,49 @@ def list_projects(
     status_filter: str | None = None,
     tag: str | None = None,
     query: str | None = None,
+    search: str | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    query = query or search
     if current_user.role in {"manager", "admin", "hr", "academic_partnership_admin"}:
         return task_repo.list_tasks(db, skip, limit, status_filter, tag, query)
     if current_user.role in {"univ_teacher", "univ_supervisor", "univ_admin"}:
         return task_repo.list_tasks(db, skip, limit, status_filter, tag, query)
     if current_user.role == "curator":
-        return (
-            db.query(Task)
-            .filter(Task.created_by == current_user.id)
-            .offset(skip)
-            .limit(limit)
-            .all()
+        q = db.query(Task).filter(
+            (Task.curator_id == current_user.id) | (Task.created_by == current_user.id)
         )
+        if status_filter:
+            q = q.filter(Task.status == status_filter)
+        if tag:
+            q = q.filter(Task.tags.ilike(f"%{tag}%"))
+        if query:
+            q = q.filter(Task.title.ilike(f"%{query}%"))
+        return q.offset(skip).limit(limit).all()
     if current_user.role == "mentor":
-        return (
+        q = (
             db.query(Task)
-            .filter(Task.mentor_id == current_user.id)
-            .offset(skip)
-            .limit(limit)
-            .all()
+            .outerjoin(TaskMentor, TaskMentor.task_id == Task.id)
+            .filter((Task.mentor_id == current_user.id) | (TaskMentor.mentor_id == current_user.id))
+            .distinct()
         )
-    return (
+        if status_filter:
+            q = q.filter(Task.status == status_filter)
+        if tag:
+            q = q.filter(Task.tags.ilike(f"%{tag}%"))
+        if query:
+            q = q.filter(Task.title.ilike(f"%{query}%"))
+        return q.offset(skip).limit(limit).all()
+    q = (
         db.query(Task)
         .filter(Task.visibility == "public")
         .filter(Task.status.in_(["open", "in_progress"]))
-        .offset(skip)
-        .limit(limit)
-        .all()
+        .filter(Task.is_archived.is_(False))
     )
+    if query:
+        q = q.filter(Task.title.ilike(f"%{query}%"))
+    return q.offset(skip).limit(limit).all()
 
 
 @router.get("/{project_id}", response_model=TaskRead)
@@ -75,6 +89,8 @@ def get_project(
 ):
     task = task_repo.get_task(db, project_id)
     if not task:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    if current_user.role == "student" and task.is_archived:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
     if current_user.role == "student" and task.visibility != "public":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
@@ -88,6 +104,52 @@ def get_project(
             task.skills_required = None
             task.course_alignment = None
     return task
+
+
+@router.patch("/{project_id}", response_model=TaskRead)
+def update_project(
+    project_id: int,
+    payload: TaskUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles("curator", "manager", "admin")),
+):
+    task = task_repo.get_task(db, project_id)
+    if not task:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    if current_user.role == "curator" and task.curator_id not in {current_user.id, None}:
+        if task.created_by != current_user.id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+    return update_task(db, task, payload)
+
+
+@router.post("/{project_id}/archive", response_model=TaskRead)
+def archive_project(
+    project_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles("curator", "manager", "admin")),
+):
+    task = task_repo.get_task(db, project_id)
+    if not task:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    if current_user.role == "curator" and task.curator_id not in {current_user.id, None}:
+        if task.created_by != current_user.id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+    return update_task(db, task, TaskUpdate(status="closed", is_archived=True))
+
+
+@router.post("/{project_id}/unarchive", response_model=TaskRead)
+def unarchive_project(
+    project_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles("curator", "manager", "admin")),
+):
+    task = task_repo.get_task(db, project_id)
+    if not task:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    if current_user.role == "curator" and task.curator_id not in {current_user.id, None}:
+        if task.created_by != current_user.id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+    return update_task(db, task, TaskUpdate(status="open", is_archived=False))
 
 
 @router.post("/{project_id}/applications", response_model=AssignmentRead)

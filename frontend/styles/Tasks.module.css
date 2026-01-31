@@ -23,7 +23,13 @@
   padding: 10px 12px;
   border-radius: 12px;
   border: 1px solid var(--border-200);
-  background: var(--card-0);
+  background: linear-gradient(180deg, #ffffff, #f5fbff);
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.search:focus {
+  border-color: rgba(74, 160, 240, 0.6);
+  box-shadow: 0 0 0 3px rgba(74, 160, 240, 0.2);
 }
 
 .list {
@@ -53,7 +59,7 @@
 .status {
   padding: 6px 12px;
   border-radius: 999px;
-  background: var(--green-100);
+  background: linear-gradient(135deg, var(--green-100), var(--blue-100));
   color: var(--green-700);
   font-size: 11px;
   text-transform: uppercase;
@@ -69,6 +75,10 @@
 .cardBody {
   margin-top: 12px;
   color: var(--text-700);
+}
+
+.card {
+  border: 1px solid rgba(47, 143, 233, 0.12);
 }
 
 .pagination {

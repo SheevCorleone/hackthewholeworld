@@ -7,39 +7,48 @@ import Button from "../../../components/Button";
 import { apiRequest } from "../../../components/api";
 import styles from "../../../styles/Manager.module.css";
 
-type Mentor = {
+type Curator = {
   id: number;
   full_name: string;
   email: string;
   created_at: string;
 };
 
-export default function ManagerMentorsPage() {
-  const [mentors, setMentors] = useState<Mentor[]>([]);
+export default function ManagerCuratorsPage() {
+  const [curators, setCurators] = useState<Curator[]>([]);
   const [query, setQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
 
+  const loadCurators = async () => {
+    try {
+      const data = await apiRequest<Curator[]>("/manager/curators");
+      setCurators(data);
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  };
+
   useEffect(() => {
-    apiRequest<Mentor[]>("/manager/mentors")
-      .then(setMentors)
-      .catch((err) => setError(err.message));
+    loadCurators();
   }, []);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return mentors;
-    return mentors.filter((mentor) => {
-      return mentor.full_name.toLowerCase().includes(q) || mentor.email.toLowerCase().includes(q);
+    if (!q) return curators;
+    return curators.filter((curator) => {
+      return (
+        curator.full_name.toLowerCase().includes(q) ||
+        curator.email.toLowerCase().includes(q)
+      );
     });
-  }, [mentors, query]);
+  }, [curators, query]);
 
-  const removeMentor = async (mentorId: number) => {
-    const ok = window.confirm("Удалить ментора? Доступ будет отключён.");
+  const removeCurator = async (curatorId: number) => {
+    const ok = window.confirm("Удалить куратора? Доступ будет отключён.");
     if (!ok) return;
     try {
-      await apiRequest(`/manager/mentors/${mentorId}`, { method: "DELETE" });
-      const updated = await apiRequest<Mentor[]>("/manager/mentors");
-      setMentors(updated);
+      await apiRequest(`/manager/curators/${curatorId}`, { method: "DELETE" });
+      loadCurators();
     } catch (err) {
       setError((err as Error).message);
     }
@@ -50,11 +59,11 @@ export default function ManagerMentorsPage() {
       <Layout>
         <div className={styles.toolbar}>
           <div>
-            <h1 className={styles.sectionTitle}>Менторы</h1>
-            <p>Список назначенных менторов.</p>
+            <h1 className={styles.sectionTitle}>Кураторы</h1>
+            <p>Список активных кураторов.</p>
           </div>
-          <Link href="/manager/mentors/new">
-            <Button>Создать ментора</Button>
+          <Link href="/manager/curators/new">
+            <Button>Создать куратора</Button>
           </Link>
         </div>
         <div className={styles.searchRow}>
@@ -67,13 +76,13 @@ export default function ManagerMentorsPage() {
         </div>
         {error && <p className={styles.error}>{error}</p>}
         <div className={styles.grid}>
-          {filtered.map((mentor) => (
-            <Card key={mentor.id}>
-              <h3>{mentor.full_name}</h3>
-              <p>{mentor.email}</p>
+          {filtered.map((curator) => (
+            <Card key={curator.id}>
+              <h3>{curator.full_name}</h3>
+              <p>{curator.email}</p>
               <div className={styles.toolbar}>
-                <span className={styles.pill}>Mentor</span>
-                <Button size="sm" variant="danger" onClick={() => removeMentor(mentor.id)}>
+                <span className={styles.pill}>Curator</span>
+                <Button size="sm" variant="danger" onClick={() => removeCurator(curator.id)}>
                   Удалить
                 </Button>
               </div>

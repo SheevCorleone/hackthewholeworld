@@ -6,6 +6,7 @@ import Card from "../../../components/Card";
 import Button from "../../../components/Button";
 import Select from "../../../components/Select";
 import Input from "../../../components/Input";
+import Textarea from "../../../components/Textarea";
 import { apiRequest } from "../../../components/api";
 import styles from "../../../styles/Manager.module.css";
 
@@ -23,12 +24,23 @@ type Project = {
   course_project_possible?: boolean | null;
   nda_required?: boolean | null;
   status: string;
+  is_archived?: boolean;
   mentor_id?: number | null;
+  curator_id?: number | null;
+  curator_full_name?: string | null;
+  mentor_full_name?: string | null;
+  mentor_names?: string[] | null;
   tags?: string | null;
   deadline?: string | null;
 };
 
 type Mentor = {
+  id: number;
+  full_name: string;
+  email: string;
+};
+
+type Curator = {
   id: number;
   full_name: string;
   email: string;
@@ -79,16 +91,20 @@ export default function ManagerProjectDetailPage() {
   const { id } = router.query;
   const [project, setProject] = useState<Project | null>(null);
   const [mentors, setMentors] = useState<Mentor[]>([]);
+  const [curators, setCurators] = useState<Curator[]>([]);
   const [taskMentors, setTaskMentors] = useState<TaskMentor[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [editingDescription, setEditingDescription] = useState(false);
+  const [descriptionValue, setDescriptionValue] = useState("");
 
   const loadProject = async () => {
     if (!id) return;
     try {
       const data = await apiRequest<Project>(`/manager/projects/${id}`);
       setProject(data);
+      setDescriptionValue(data.description);
     } catch (err) {
       setError((err as Error).message);
     }
@@ -109,9 +125,27 @@ export default function ManagerProjectDetailPage() {
     loadProject();
     loadApplications();
     apiRequest<Mentor[]>("/manager/mentors").then(setMentors).catch(() => null);
+    apiRequest<Curator[]>("/manager/curators").then(setCurators).catch(() => null);
     apiRequest<Question[]>(`/questions?task_id=${id}`).then(setQuestions).catch(() => null);
     apiRequest<TaskMentor[]>(`/manager/projects/${id}/mentors`).then(setTaskMentors).catch(() => null);
   }, [id]);
+
+  const handleAssignCurator = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!id) return;
+    const form = new FormData(event.currentTarget);
+    try {
+      const updated = await apiRequest<Project>(`/manager/projects/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          curator_id: form.get("curator_id") ? Number(form.get("curator_id")) : null
+        })
+      });
+      setProject(updated);
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  };
 
   const handleAssignMentor = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -135,6 +169,30 @@ export default function ManagerProjectDetailPage() {
     try {
       const updated = await apiRequest<Project>(`/manager/projects/${id}/archive`, { method: "POST" });
       setProject(updated);
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  };
+
+  const unarchiveProject = async () => {
+    if (!id) return;
+    try {
+      const updated = await apiRequest<Project>(`/manager/projects/${id}/unarchive`, { method: "POST" });
+      setProject(updated);
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  };
+
+  const saveDescription = async () => {
+    if (!id || !descriptionValue.trim()) return;
+    try {
+      const updated = await apiRequest<Project>(`/manager/projects/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ description: descriptionValue.trim() })
+      });
+      setProject(updated);
+      setEditingDescription(false);
     } catch (err) {
       setError((err as Error).message);
     }
@@ -196,7 +254,26 @@ export default function ManagerProjectDetailPage() {
           <div className={styles.stack}>
             <Card>
               <h2>{project.title}</h2>
-              <p>{project.description}</p>
+              {editingDescription ? (
+                <div className={styles.formStack}>
+                  <Textarea
+                    value={descriptionValue}
+                    onChange={(event) => setDescriptionValue(event.target.value)}
+                    rows={5}
+                    placeholder="Описание проекта"
+                  />
+                  <div className={styles.toolbar}>
+                    <Button size="sm" onClick={saveDescription}>
+                      Сохранить описание
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => setEditingDescription(false)}>
+                      Отмена
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <p>{project.description}</p>
+              )}
               {project.goal && <p>Цель: {project.goal}</p>}
               {project.key_tasks && <p>Ключевые задачи: {project.key_tasks}</p>}
               {project.novelty && <p>Новизна: {project.novelty}</p>}
@@ -206,11 +283,26 @@ export default function ManagerProjectDetailPage() {
               </div>
               <div className={styles.toolbar}>
                 <span className={styles.pill}>{project.status}</span>
-                <span className={styles.pill}>Mentor: {project.mentor_id ?? "не назначен"}</span>
+                {project.is_archived && <span className={styles.pill}>архив</span>}
+                <span className={styles.pill}>Куратор: {project.curator_full_name || "не назначен"}</span>
+                <span className={styles.pill}>
+                  Ментор: {project.mentor_names?.length ? project.mentor_names.join(", ") : project.mentor_full_name || "не назначен"}
+                </span>
               </div>
-              <Button size="sm" variant="ghost" onClick={archiveProject}>
-                Архивировать проект
-              </Button>
+              <div className={styles.toolbar}>
+                <Button size="sm" variant="secondary" onClick={() => setEditingDescription(true)}>
+                  Редактировать описание
+                </Button>
+                {project.is_archived ? (
+                  <Button size="sm" variant="ghost" onClick={unarchiveProject}>
+                    Вернуть из архива
+                  </Button>
+                ) : (
+                  <Button size="sm" variant="ghost" onClick={archiveProject}>
+                    Архивировать проект
+                  </Button>
+                )}
+              </div>
               <div className={styles.toolbar}>
                 <span className={styles.pill}>
                   Диплом: {project.diploma_possible ? "да" : "нет"}
@@ -226,7 +318,22 @@ export default function ManagerProjectDetailPage() {
             </Card>
 
             <Card>
-              <h3>Назначить ментора</h3>
+              <h3>Назначить куратора</h3>
+              <form onSubmit={handleAssignCurator} className={styles.toolbar}>
+                <Select name="curator_id" defaultValue={project.curator_id ?? ""}>
+                  <option value="">Без куратора</option>
+                  {curators.map((curator) => (
+                    <option key={curator.id} value={curator.id}>
+                      {curator.full_name} · {curator.email}
+                    </option>
+                  ))}
+                </Select>
+                <Button type="submit">Сохранить</Button>
+              </form>
+            </Card>
+
+            <Card>
+              <h3>Основной ментор</h3>
               <form onSubmit={handleAssignMentor} className={styles.toolbar}>
                 <Select name="mentor_id" defaultValue={project.mentor_id ?? ""}>
                   <option value="">Без ментора</option>

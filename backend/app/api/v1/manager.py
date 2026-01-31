@@ -72,7 +72,7 @@ def create_project(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles("manager", "admin")),
 ):
-    return create_task(db, payload, current_user.id)
+    return create_task(db, payload, current_user.id, current_user.role)
 
 
 @router.get("/projects/{task_id}", response_model=TaskRead)
@@ -109,8 +109,19 @@ def archive_project(
     task = task_repo.get_task(db, task_id)
     if not task:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
-    task.status = "closed"
-    return update_task(db, task, TaskUpdate(status="closed"))
+    return update_task(db, task, TaskUpdate(status="closed", is_archived=True))
+
+
+@router.post("/projects/{task_id}/unarchive", response_model=TaskRead)
+def unarchive_project(
+    task_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("manager", "admin")),
+):
+    task = task_repo.get_task(db, task_id)
+    if not task:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    return update_task(db, task, TaskUpdate(status="open", is_archived=False))
 
 
 @router.get("/projects/{task_id}/applications", response_model=list[ApplicationWithStudent])
@@ -228,7 +239,15 @@ def list_mentors(
     db: Session = Depends(get_db),
     _: User = Depends(require_roles("manager", "admin")),
 ):
-    return user_repo.list_users_by_role(db, "mentor", 0, 200)
+    return db.query(User).filter(User.role == "mentor", User.status == "active").all()
+
+
+@router.get("/curators", response_model=list[UserRead])
+def list_curators(
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("manager", "admin")),
+):
+    return db.query(User).filter(User.role == "curator", User.status == "active").all()
 
 
 @router.get("/projects/{task_id}/mentors", response_model=list[TaskMentorRead])
@@ -288,6 +307,40 @@ def remove_task_mentor(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
     task_mentor_repo.remove_task_mentor(db, task_id, mentor_id)
     return {"message": "Mentor removed"}
+
+
+@router.delete("/mentors/{mentor_id}", response_model=UserRead)
+def delete_mentor(
+    mentor_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("manager", "admin")),
+):
+    mentor = db.get(User, mentor_id)
+    if not mentor or mentor.role != "mentor":
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Mentor not found")
+    mentor.status = "disabled"
+    mentor.token_version = (mentor.token_version or 0) + 1
+    db.add(mentor)
+    db.commit()
+    db.refresh(mentor)
+    return mentor
+
+
+@router.delete("/curators/{curator_id}", response_model=UserRead)
+def delete_curator(
+    curator_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("manager", "admin")),
+):
+    curator = db.get(User, curator_id)
+    if not curator or curator.role != "curator":
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Curator not found")
+    curator.status = "disabled"
+    curator.token_version = (curator.token_version or 0) + 1
+    db.add(curator)
+    db.commit()
+    db.refresh(curator)
+    return curator
 
 
 @router.get("/students", response_model=list[StudentWithStats])

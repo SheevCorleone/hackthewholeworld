@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import DateTime, Enum, Integer, String
+from sqlalchemy import DateTime, Enum, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -37,6 +37,7 @@ class User(Base):
     avatar_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     faculty: Mapped[str | None] = mapped_column(String(255), nullable=True)
     skills: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    about: Mapped[str | None] = mapped_column(Text, nullable=True)
     course: Mapped[str | None] = mapped_column(String(255), nullable=True)
     linkedin_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     github_url: Mapped[str | None] = mapped_column(String(500), nullable=True)

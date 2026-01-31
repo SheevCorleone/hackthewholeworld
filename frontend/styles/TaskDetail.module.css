@@ -63,6 +63,14 @@
   color: var(--muted-600);
 }
 
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 12px;
+}
+
 .commentMeta {
   display: block;
   margin-top: 8px;

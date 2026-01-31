@@ -10,7 +10,7 @@ const navByRole: Record<string, { label: string; href: string }[]> = {
     { label: "Проекты", href: "/manager/projects" },
     { label: "Студенты", href: "/manager/students" },
     { label: "Менторы", href: "/manager/mentors" },
-    { label: "Кураторы", href: "/manager/curators/new" },
+    { label: "Кураторы", href: "/manager/curators" },
     { label: "Рецензии", href: "/manager/reviews" },
     { label: "HR дашборд", href: "/hr/dashboard" }
   ],
