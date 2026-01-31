@@ -67,6 +67,6 @@ def list_questions(
     if task.nda_required and current_user.role == "student":
         assignment = assignment_repo.find_assignment(db, task.id, current_user.id)
         if not assignment or not assignment.nda_accepted:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="NDA required for questions")
+            return []
     questions = comment_repo.list_questions(db, task_id, skip, limit)
     return [question for question in questions if _can_view_question(current_user, question)]

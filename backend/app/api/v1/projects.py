@@ -40,7 +40,7 @@ def list_projects(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    query = query or search
+    query = (query or search or "").strip() or None
     if current_user.role in {"manager", "admin", "hr", "academic_partnership_admin"}:
         return task_repo.list_tasks(db, skip, limit, status_filter, tag, query)
     if current_user.role in {"univ_teacher", "univ_supervisor", "univ_admin"}:

@@ -15,8 +15,15 @@ type Project = {
   tags?: string | null;
 };
 
+type Assignment = {
+  id: number;
+  task_id: number;
+  state: string;
+};
+
 export default function StudentProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [assignments, setAssignments] = useState<Record<number, Assignment>>({});
   const [page, setPage] = useState(0);
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -35,6 +42,26 @@ export default function StudentProjectsPage() {
       .then(setProjects)
       .catch((err) => setError(err.message));
   }, [page, debouncedQuery]);
+
+  useEffect(() => {
+    apiRequest<Assignment[]>("/assignments/me")
+      .then((data) => {
+        const mapped = data.reduce<Record<number, Assignment>>((acc, item) => {
+          acc[item.task_id] = item;
+          return acc;
+        }, {});
+        setAssignments(mapped);
+      })
+      .catch(() => null);
+  }, []);
+
+  const statusLabel = (state?: string | null) => {
+    if (!state) return null;
+    if (state === "requested") return "pending";
+    if (state === "active" || state === "done") return "approved";
+    if (state === "canceled") return "rejected";
+    return state;
+  };
 
   return (
     <RouteGuard roles={["student"]}>
@@ -60,6 +87,9 @@ export default function StudentProjectsPage() {
                   <span className={styles.status}>{project.status}</span>
                 </div>
                 <p className={styles.cardBody}>{project.description}</p>
+                <p className={styles.cardMeta}>
+                  Статус заявки: {statusLabel(assignments[project.id]?.state) || "нет"}
+                </p>
                 {project.tags && <p className={styles.cardMeta}>Tags: {project.tags}</p>}
               </Card>
             </Link>
