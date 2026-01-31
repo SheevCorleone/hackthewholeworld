@@ -12,6 +12,7 @@ type Project = {
   title: string;
   description: string;
   status: string;
+  is_archived?: boolean;
   tags?: string;
 };
 
@@ -44,7 +45,10 @@ export default function ManagerProjectsPage() {
               <Card>
                 <h3>{project.title}</h3>
                 <p>{project.description}</p>
-                <span className={styles.pill}>{project.status}</span>
+                <div className={styles.toolbar}>
+                  <span className={styles.pill}>{project.status}</span>
+                  {project.is_archived && <span className={styles.pill}>архив</span>}
+                </div>
               </Card>
             </Link>
           ))}

@@ -16,6 +16,8 @@ class TaskBase(BaseModel):
     nda_required: bool | None = None
     tags: str | None = None
     status: str | None = None
+    is_archived: bool | None = None
+    curator_id: int | None = None
     mentor_id: int | None = None
     deadline: datetime | None = None
     visibility: str | None = None
@@ -44,6 +46,8 @@ class TaskUpdate(BaseModel):
     nda_required: bool | None = None
     tags: str | None = None
     status: str | None = None
+    is_archived: bool | None = None
+    curator_id: int | None = None
     mentor_id: int | None = None
     deadline: datetime | None = None
     visibility: str | None = None
@@ -54,6 +58,9 @@ class TaskRead(TaskBase):
     created_by: int
     created_at: datetime
     updated_at: datetime
+    curator_full_name: str | None = None
+    mentor_full_name: str | None = None
+    mentor_names: list[str] | None = None
 
     class Config:
         from_attributes = True

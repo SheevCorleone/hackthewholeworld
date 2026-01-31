@@ -90,6 +90,30 @@
   justify-content: space-between;
 }
 
+.formStack {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.searchRow {
+  margin-top: 12px;
+}
+
+.search {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--radius-12);
+  border: 1px solid var(--border-200);
+  background: linear-gradient(180deg, #ffffff, #f5faff);
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.search:focus {
+  border-color: rgba(74, 160, 240, 0.6);
+  box-shadow: 0 0 0 3px rgba(74, 160, 240, 0.2);
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;

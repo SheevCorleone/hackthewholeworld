@@ -11,6 +11,7 @@ type Project = {
   title: string;
   description: string;
   status: string;
+  is_archived?: boolean;
 };
 
 export default function CuratorProjectsPage() {
@@ -33,12 +34,13 @@ export default function CuratorProjectsPage() {
         <div className={styles.list}>
           {projects.map((project) => (
             <Link key={project.id} href={`/curator/projects/${project.id}`}>
-              <Card>
+              <Card className={styles.card}>
                 <div className={styles.cardHeader}>
                   <h2 className={styles.cardTitle}>{project.title}</h2>
                   <span className={styles.status}>{project.status}</span>
                 </div>
                 <p className={styles.cardBody}>{project.description}</p>
+                {project.is_archived && <span className={styles.cardMeta}>Архив</span>}
               </Card>
             </Link>
           ))}

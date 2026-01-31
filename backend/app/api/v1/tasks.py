@@ -18,7 +18,7 @@ def create_task_endpoint(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles("curator", "manager", "admin")),
 ):
-    return create_task(db, payload, current_user.id)
+    return create_task(db, payload, current_user.id, current_user.role)
 
 
 @router.get("", response_model=list[TaskRead])
@@ -47,11 +47,14 @@ def update_task_endpoint(
     task_id: int,
     payload: TaskUpdate,
     db: Session = Depends(get_db),
-    _: User = Depends(require_roles("curator", "manager", "admin")),
+    current_user: User = Depends(require_roles("curator", "manager", "admin")),
 ):
     task = task_repo.get_task(db, task_id)
     if not task:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
+    if current_user.role == "curator" and task.curator_id not in {current_user.id, None}:
+        if task.created_by != current_user.id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
     return update_task(db, task, payload)
 
 
@@ -72,10 +75,27 @@ def delete_task_endpoint(
 def archive_task_endpoint(
     task_id: int,
     db: Session = Depends(get_db),
-    _: User = Depends(require_roles("curator", "manager", "admin")),
+    current_user: User = Depends(require_roles("curator", "manager", "admin")),
 ):
     task = task_repo.get_task(db, task_id)
     if not task:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
-    task.status = "closed"
-    return update_task(db, task, TaskUpdate(status="closed"))
+    if current_user.role == "curator" and task.curator_id not in {current_user.id, None}:
+        if task.created_by != current_user.id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+    return update_task(db, task, TaskUpdate(status="closed", is_archived=True))
+
+
+@router.post("/{task_id}/unarchive", response_model=TaskRead)
+def unarchive_task_endpoint(
+    task_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles("curator", "manager", "admin")),
+):
+    task = task_repo.get_task(db, task_id)
+    if not task:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
+    if current_user.role == "curator" and task.curator_id not in {current_user.id, None}:
+        if task.created_by != current_user.id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+    return update_task(db, task, TaskUpdate(status="open", is_archived=False))
