@@ -35,7 +35,7 @@
 .status {
   padding: 6px 12px;
   border-radius: 999px;
-  background: var(--green-100);
+  background: linear-gradient(135deg, var(--green-100), var(--blue-100));
   color: var(--green-700);
   font-size: 11px;
   text-transform: uppercase;
@@ -106,4 +106,87 @@
 .error {
   color: #d6453d;
   font-size: 13px;
+}
+
+.detailGrid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr);
+}
+
+.detailCard {
+  display: grid;
+  gap: 16px;
+}
+
+.tagPill {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(74, 160, 240, 0.12);
+  color: var(--blue-600);
+  font-size: 12px;
+}
+
+.section {
+  display: grid;
+  gap: 8px;
+}
+
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-900);
+  margin: 0;
+}
+
+.sectionBody {
+  margin: 0;
+  color: var(--text-700);
+  line-height: 1.6;
+}
+
+.infoCard {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--radius-16);
+  border: 1px solid var(--border-200);
+  background: #f8fbff;
+}
+
+.infoTitle {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted-600);
+  margin: 0;
+}
+
+.infoValue {
+  font-weight: 600;
+  color: var(--text-900);
+  margin: 0;
+}
+
+.ctaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.badgeArchived {
+  background: rgba(15, 138, 76, 0.08);
+  color: var(--green-700);
+  border: 1px solid rgba(15, 138, 76, 0.2);
+}
+
+.skeletonBlock {
+  height: 16px;
+  width: 100%;
+}
+
+@media (max-width: 960px) {
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
 }
